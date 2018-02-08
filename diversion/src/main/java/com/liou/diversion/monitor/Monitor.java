@@ -13,19 +13,12 @@ public class Monitor {
     private DiversionCluster diversionCluster;
 
     public String clusterInfo() {
-        Map<String, String> clusterStatus = new HashMap<>();
-        Iterator<DiversionNode> it = diversionCluster.getNodeSet().iterator();
-        while (it.hasNext()) {
-            DiversionNode diversionNode = it.next();
-            clusterStatus.put(diversionNode.getKey(),
-                    diversionCluster.isReady(diversionNode) ? "ready" : "not ready");
-        }
-        return JSON.toJSONString(clusterStatus);
+        return diversionCluster.clusterInfo();
     }
 
     public void removeNode(String sign) {
         DiversionNode node = diversionCluster.getNode(sign);
-        diversionCluster.removeNode(node);
+        diversionCluster.nodeUnreachable(node, true);
     }
     
     public void setDiversionCluster(DiversionCluster diversionCluster) {

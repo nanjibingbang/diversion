@@ -38,7 +38,7 @@ public class KeepAliveChannelHandler extends ChannelInboundHandlerAdapter {
                 logger.info("reconnect {} success", channel.remoteAddress());
             } catch (Exception e) {
                 logger.error("reconnet failer", e);
-                cluster.removeNode(node, false);
+                cluster.nodeUnreachable(node, false);
             }
         }
         ctx.fireChannelInactive();

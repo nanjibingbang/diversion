@@ -1,8 +1,8 @@
 package com.liou.diversion.node;
 
+import com.alibaba.fastjson.JSONObject;
 import com.liou.diversion.container.Config;
 import com.liou.diversion.container.Destroyable;
-import com.liou.diversion.container.Initialization;
 import com.liou.diversion.transport.ChannelFactory;
 import com.liou.diversion.transport.IoChannel;
 import com.liou.diversion.zk.ChildrenChangeHandler;
@@ -19,23 +19,22 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 /**
  * TODO 添加收敛分析及控制
  *
  * @author liou
  */
-public class DiversionCluster implements ChildrenChangeHandler, AccessService, Initialization, Destroyable {
+public class DiversionCluster implements ChildrenChangeHandler, Destroyable {
     private static Logger logger = LoggerFactory.getLogger(DiversionCluster.class);
 
-    @Config("diversion.nodes")
-    private String nodes;
-    @Config("diversion.listenport")
+    @Config("listenport")
     private int listenPort;
     private final String localHost;
     private DiversionNode localNode;
 
-    @Config("diversion.replictions")
+    @Config("replictions")
     private int replictions;
     private Set<DiversionNode> nodeSet;
     private TreeMap<Integer, VirtualNode> circle;
@@ -43,7 +42,7 @@ public class DiversionCluster implements ChildrenChangeHandler, AccessService, I
 
     private ChannelFactory channelFactory;
 
-    @Config("diversion.zookeeper.root")
+    @Config("zookeeper.root")
     private String regRoot;
 
     public DiversionCluster() throws SocketException {
@@ -54,12 +53,7 @@ public class DiversionCluster implements ChildrenChangeHandler, AccessService, I
     }
 
     @Override
-    public boolean access(DiversionNode diversionNode) {
-        return addOrClose(diversionNode);
-    }
-
-    @Override
-    public void init() throws Exception {
+    public void build(List<String> nodes) throws Exception {
         /**
          * 开放接入端口
          */
@@ -68,66 +62,15 @@ public class DiversionCluster implements ChildrenChangeHandler, AccessService, I
         } catch (Exception e) {
             throw new SocketException(String.format("fail to listen on %d", listenPort));
         }
-        logger.debug("开放接入端口{}", listenPort);
+        logger.info("开放接入端口{}", listenPort);
 
-        if (StringUtils.isNotBlank(nodes)) {
-            createAndConnectNodes(nodes);
+        // 添加所有节点
+        if (nodes != null && nodes.size() > 0) {
+            nodes.forEach(node -> addNode(new DiversionNode(node)));
         }
         // add local
-        localNode = new DiversionNode(localHost, listenPort);
+        localNode = new DiversionNode(String.format("%s->%s", localHost, listenPort));
         addNode(localNode);
-//        if (nodeSet.size() == 1) {
-//            logger.warn("当前节点集中只包含本地节点!");
-//        }
-    }
-
-    /**
-     * 创建nodes并连接
-     *
-     * @param nodes
-     */
-    private void createAndConnectNodes(String nodes) {
-        // InetSocketAddress localAddress = new InetSocketAddress(localPort);
-        String[] array = nodes.split(";");
-        for (String node : array) {
-            if (node != null) {
-                try {
-                    doCreateAndConnect(node);
-                } catch (IOException e) {
-                    logger.error("节点未连接:{}", node, e);
-                } catch (RuntimeException e) {
-                    throw new IllegalArgumentException(String.format("正确配置nodes:%s", nodes), e);
-                }
-            }
-        }
-    }
-
-    private void doCreateAndConnect(String node) throws IOException {
-        int index = node.indexOf("->");
-        String host = node.substring(0, index);
-        String portStr = node.substring(index + 2);
-        int remotePort = Integer.valueOf(portStr);
-        DiversionNode diversionNode = new DiversionNode(host, remotePort);
-        IoChannel channel = channelFactory.createChannel(host, remotePort, null);
-        diversionNode.channel(channel);
-        addOrClose(diversionNode);
-        channel.fireInited();
-    }
-
-    /**
-     * 节点重新连接并添加到节点集
-     *
-     * @param diversionNode
-     * @return
-     * @throws IOException
-     */
-    public void nodeReconnect(DiversionNode diversionNode) throws IOException {
-        IoChannel ioChannel = channelFactory.reconnect(diversionNode.channel(), null);
-        diversionNode.channel(ioChannel);
-        if (!addNode(diversionNode)) { // 节点集已包含只是替换io channel
-            ioChannel.addAttribute("cluster", this);
-        }
-        ioChannel.fireInited();
     }
 
     /**
@@ -152,18 +95,8 @@ public class DiversionCluster implements ChildrenChangeHandler, AccessService, I
         throw new SocketException("Can't get local ip address, interfaces are: " + interfaces);
     }
 
-    /**
-     * 添加到cluster，添加失败则关闭node的channel
-     *
-     * @param diversionNode
-     * @return
-     */
-    public boolean addOrClose(DiversionNode diversionNode) {
-        boolean added = addNode(diversionNode);
-        if (!added) {
-            diversionNode.closeChannel();
-        }
-        return added;
+    public boolean isLocalNode(DiversionNode diversionNode) {
+        return diversionNode == localNode;
     }
 
     /**
@@ -172,7 +105,7 @@ public class DiversionCluster implements ChildrenChangeHandler, AccessService, I
      * @param node
      * @return
      */
-    public boolean addNode(DiversionNode node) {
+    private boolean addNode(DiversionNode node) {
         circleLock.lock();
         try {
             Iterator<DiversionNode> it = nodeSet.iterator();
@@ -180,9 +113,6 @@ public class DiversionCluster implements ChildrenChangeHandler, AccessService, I
                 if (it.next().equals(node)) {
                     return false;
                 }
-            }
-            if (!isLocalNode(node)) {
-                node.channel().addAttribute("cluster", this);
             }
             nodeSet.add(node);
             int hash = node.hashCode();
@@ -199,12 +129,10 @@ public class DiversionCluster implements ChildrenChangeHandler, AccessService, I
     }
 
     public DiversionNode getNode(String sign) {
-        Iterator<DiversionNode> it = nodeSet.iterator();
-        while (it.hasNext()) {
-            DiversionNode next = it.next();
-            if (next.getKey().equals(sign)) {
-                return next;
-            }
+        List<DiversionNode> collect = nodeSet.stream().filter(node -> node.getKey().equals(sign))
+                .collect(Collectors.toList());
+        if (collect.size() > 0) {
+            return collect.get(0);
         }
         return null;
     }
@@ -215,7 +143,7 @@ public class DiversionCluster implements ChildrenChangeHandler, AccessService, I
      * @param node
      * @param close 是否关闭channel
      */
-    public void removeNode(DiversionNode node, boolean close) {
+    private void removeNode(DiversionNode node, boolean close) {
         circleLock.lock();
         try {
             if (close) {
@@ -233,15 +161,6 @@ public class DiversionCluster implements ChildrenChangeHandler, AccessService, I
             circleLock.unlock();
         }
         logger.warn("移除 {}", node);
-    }
-
-    /**
-     * 移除并关闭node
-     *
-     * @param node
-     */
-    public void removeNode(DiversionNode node) {
-        removeNode(node, true);
     }
 
     /**
@@ -264,10 +183,13 @@ public class DiversionCluster implements ChildrenChangeHandler, AccessService, I
                 } else {
                     actual = tailMap.get(tailMap.firstKey()).getActual();
                 }
-                if (isReady(actual)) {
-                    break;
-                } else {
-                    logger.error("非有效连接节点{}", actual);
+                try {
+                    if (!isReady(actual)) {
+                        connectNode(actual);
+                    }
+                    return actual;
+                } catch (IOException e) {
+                    logger.error("fail connect to {}", actual, e);
                     removeNode(actual, false);
                     tailMap = circle.tailMap(key);
                 }
@@ -275,11 +197,6 @@ public class DiversionCluster implements ChildrenChangeHandler, AccessService, I
         } finally {
             circleLock.unlock();
         }
-        return actual;
-    }
-
-    public boolean isLocalNode(DiversionNode diversionNode) {
-        return diversionNode == localNode;
     }
 
     /**
@@ -290,27 +207,74 @@ public class DiversionCluster implements ChildrenChangeHandler, AccessService, I
         return node != null && (isLocalNode(node) || node.isReady());
     }
 
-    public void setChannelFactory(ChannelFactory channelFactory) {
-        this.channelFactory = channelFactory;
+    public void nodeUnreachable(DiversionNode diversionNode, boolean close) {
+        removeNode(diversionNode, close);
     }
 
-    public Set<DiversionNode> getNodeSet() {
-        return nodeSet;
+    private void connectNode(DiversionNode diversionNode) throws IOException {
+        String nodeSign = diversionNode.getKey();
+        int index = nodeSign.indexOf("->");
+        String host = nodeSign.substring(0, index);
+        String portStr = nodeSign.substring(index + 2);
+        int remotePort = Integer.valueOf(portStr);
+        IoChannel channel = channelFactory.createChannel(host, remotePort, null);
+        channel.addAttribute("cluster", this);
+        channel.fireInited();
+        diversionNode.channel(channel);
+    }
+
+    /**
+     * 节点重新连接并添加到节点集
+     *
+     * @param diversionNode
+     * @return
+     * @throws IOException
+     */
+    public void nodeReconnect(DiversionNode diversionNode) throws IOException {
+        // 将监听端口同时作为连接端口
+//        InetSocketAddress localAddress = new InetSocketAddress(localHost, listenPort);
+        IoChannel ioChannel = channelFactory.reconnect(diversionNode.channel(), null);
+        diversionNode.channel(ioChannel);
+        if (!addNode(diversionNode)) { // 节点集已包含只是替换io channel
+            // 在channel记录cluster属性
+            ioChannel.addAttribute("cluster", this);
+        }
+        ioChannel.fireInited();
+    }
+
+    public void setChannelFactory(ChannelFactory channelFactory) {
+        this.channelFactory = channelFactory;
     }
 
     public String getLocalNodeString() {
         return localNode.getKey();
     }
 
+    /**
+     * 节点集信息
+     *
+     * @return
+     */
+    public String clusterInfo() {
+        JSONObject jo = new JSONObject();
+        nodeSet.forEach(node -> jo.put(node.getKey(), isReady(node)
+                ? "ready" : "not ready"));
+        return jo.toString();
+    }
+
     @Override
     public void destroy() {
-        Iterator<DiversionNode> it = nodeSet.iterator();
-        while (it.hasNext()) {
-            DiversionNode diversionNode = it.next();
-            if (!isLocalNode(diversionNode) && diversionNode.isReady()) {
-                diversionNode.closeChannel();
-            }
+        circleLock.lock();
+        try {
+            nodeSet.forEach(diversionNode -> {
+                if (!isLocalNode(diversionNode) && diversionNode.isReady()) {
+                    diversionNode.closeChannel();
+                }
+            });
+        } finally {
+            circleLock.unlock();
         }
+        // 确保在netty关闭前所有对端都能接收到channel断开信息所以channelFactory在此关闭
         channelFactory.shutdown();
     }
 
@@ -321,23 +285,21 @@ public class DiversionCluster implements ChildrenChangeHandler, AccessService, I
 
     @Override
     public void handleChildRemoved(String child) {
-        int index = child.indexOf('_');
-        if (index > 0) {
-            String nodeName = child.substring(0, index);
-            DiversionNode node = getNode(nodeName);
-            if (node != null) {
-                removeNode(node);
-            }
+        circleLock.lock();
+        try {
+            List<DiversionNode> collect = nodeSet.stream()
+                    .filter(node -> node.getKey().equals(child)).collect(Collectors.toList());
+            nodeSet.removeAll(collect);
+        } finally {
+            circleLock.unlock();
         }
     }
 
     @Override
     public void handleChildAdded(String child) {
         if (StringUtils.isNotBlank(child)) {
-            try {
-                doCreateAndConnect(child);
-            } catch (Exception e) {
-                logger.error("节点未连接:{}", child, e);
+            if (!addNode(new DiversionNode(child))) {
+                logger.warn("node exist {}", child);
             }
         }
     }

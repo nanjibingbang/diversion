@@ -23,9 +23,8 @@ import org.springframework.core.type.AnnotationMetadata;
 
 /**
  * diversion整合spring，开启AspectJ Auto Proxy
- * 
- * @author liou
  *
+ * @author liou
  */
 public class DiversionBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar {
 
@@ -46,7 +45,7 @@ public class DiversionBeanDefinitionRegistrar implements ImportBeanDefinitionReg
 
         // 切点注册
         doRegistry(registry, DiversionInterceptor.class, null,
-                new KeyValue[] { new KeyValue("diversionService", "diversionService") });
+                new KeyValue[]{new KeyValue("diversionService", "diversionService")});
         //
         doRegistry(registry, SpringContainer.class, null, null);
 
@@ -69,32 +68,27 @@ public class DiversionBeanDefinitionRegistrar implements ImportBeanDefinitionReg
         registry.registerBeanDefinition(beanName, beanDefinition);
         // bean处理
         doRegistry(registry, DiversionBeanPostProcessor.class, null,
-                new KeyValue[]{ new KeyValue("diversionConfig", DiversionPropertiesSupport.class.getName())});
-
+                new KeyValue[]{new KeyValue("diversionConfig", DiversionPropertiesSupport.class.getName())});
         // 暂存器
         doRegistry(registry, DefaultTransientProvider.class, "transientProvider", null);
-
+        // 执行线程池
         doRegistry(registry, ElementTaskExecutor.class, "elementTaskExecutor",
-                new KeyValue[] { new KeyValue("transientProvider", "transientProvider"),
-                new KeyValue("container", SpringContainer.class.getName())});
+                new KeyValue[]{new KeyValue("transientProvider", "transientProvider"),
+                        new KeyValue("container", SpringContainer.class.getName())});
         // diversion service
         doRegistry(registry, DiversionService.class, "diversionService",
-                new KeyValue[] { new KeyValue("transientProvider", "transientProvider"),
+                new KeyValue[]{new KeyValue("transientProvider", "transientProvider"),
                         new KeyValue("elementTaskExecutor", "elementTaskExecutor"),
                         new KeyValue("diversionCluster", "diversionCluster")});
-
         // netty
         doRegistry(registry, NettyChannelFactory.class, "channelFactory",
-                new KeyValue[] { new KeyValue("diversionService", "diversionService") });
-
+                new KeyValue[]{new KeyValue("diversionService", "diversionService")});
         // 节点集
         doRegistry(registry, DiversionCluster.class, "diversionCluster",
-                new KeyValue[] { new KeyValue("channelFactory", "channelFactory") });
-
+                new KeyValue[]{new KeyValue("channelFactory", "channelFactory")});
         // monitor
         doRegistry(registry, Monitor.class, null,
-                new KeyValue[] { new KeyValue("diversionCluster", "diversionCluster") });
-
+                new KeyValue[]{new KeyValue("diversionCluster", "diversionCluster")});
         // zookeeper
         doRegistry(registry, ZookeeperClient.class, "zookeeperClient", null);
         doRegistry(registry, ZookeeperRegister.class, null, new KeyValue[]{
@@ -103,7 +97,6 @@ public class DiversionBeanDefinitionRegistrar implements ImportBeanDefinitionReg
     }
 
     /**
-     *
      * @param registry
      * @param beanClazz
      * @param beanName

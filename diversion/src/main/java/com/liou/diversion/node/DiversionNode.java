@@ -2,6 +2,7 @@ package com.liou.diversion.node;
 
 import com.liou.diversion.element.Element;
 import com.liou.diversion.transport.ChannelIoException;
+import com.liou.diversion.transport.ChannelManager;
 import com.liou.diversion.transport.IoChannel;
 import com.liou.diversion.transport.packet.Packet;
 import com.liou.diversion.utils.HessianUtils;
@@ -11,27 +12,22 @@ import org.slf4j.LoggerFactory;
 /**
  * 节点模型，一致性hash计算及channel管理
  */
-public class DiversionNode extends VirtualNode implements HashNode {
+public class DiversionNode extends VirtualNode implements HashNode, ChannelManager {
 
     private static Logger logger = LoggerFactory.getLogger(DiversionNode.class);
 
-    private final String host;
-    private final int port;
     private IoChannel channel;
 
-    public DiversionNode(String host, int port) {
-        super(String.format("%s->%s", host, port), null);
-        this.host = host;
-        this.port = port;
+    public DiversionNode(String nodeSign) {
+        super(nodeSign, null);
     }
 
+    @Override
     public boolean isReady() {
         return channel != null && channel.isActive();
     }
 
-    /**
-     * 强制更新channel并关闭之前的channel
-     */
+    @Override
     public void channel(IoChannel channel) {
         if (this.channel != null && this.channel != channel) {
             this.channel.close();
@@ -40,10 +36,12 @@ public class DiversionNode extends VirtualNode implements HashNode {
         this.channel.addAttribute("node", this);
     }
 
+    @Override
     public IoChannel channel() {
         return channel;
     }
 
+    @Override
     public void closeChannel() {
         channel.close();
         channel = null;
@@ -59,27 +57,9 @@ public class DiversionNode extends VirtualNode implements HashNode {
         return channel.request(element, timeout);
     }
 
-    /**
-     * 回传更新结果
-     *
-     * @param result
-     * @param sign
-     */
-    public void responseUpdated(Object result, int sign) {
-        try {
-            Packet serialized = HessianUtils.serialize(result, sign);
-            serialized.setResp();
-            channel.sendData(serialized);
-        } catch (ChannelIoException e) {
-            logger.warn("Unreachable Node:{}", this, e);
-        } catch (RuntimeException e) {
-            logger.error("response error:{},{}", result, sign, e);
-        }
-    }
-
     @Override
     public String toString() {
-        return String.format("DiversionNode [host=%s, port=%s]", host, port);
+        return String.format("DiversionNode[%s]", getKey());
     }
 
 }

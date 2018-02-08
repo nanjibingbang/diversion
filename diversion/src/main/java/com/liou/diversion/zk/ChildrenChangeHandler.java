@@ -1,5 +1,7 @@
 package com.liou.diversion.zk;
 
+import java.util.List;
+
 /**
  * Content : zookeeper子节点变更处理器
  *
@@ -13,6 +15,8 @@ public interface ChildrenChangeHandler {
      * @return
      */
     String getPath();
+
+    void build(List<String> children) throws Exception;
 
     /**
      * 子节点添加

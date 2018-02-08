@@ -11,9 +11,9 @@ import io.netty.util.AttributeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
@@ -36,7 +36,8 @@ public class NettyChannel implements IoChannel {
     /**
      * 请求应答对应map
      */
-    private static Map<Integer, RequestFuture> waitMap = new HashMap<>();
+//    private static ConcurrentSkipListMap<Integer, RequestFuture> waitMap = new ConcurrentSkipListMap<>();
+    private static ConcurrentHashMap<Integer, RequestFuture> waitMap = new ConcurrentHashMap<>();
 
     public final static AttributeKey<NettyChannel> ATTRKEY_IOCHANNEL = AttributeKey.newInstance("ioChannelKey");
 
@@ -62,6 +63,10 @@ public class NettyChannel implements IoChannel {
     protected void setChannel(Channel channel) {
         channel.attr(ATTRKEY_IOCHANNEL).set(this);
         this.channel = channel;
+    }
+
+    protected Channel getChannel() {
+        return channel;
     }
 
     @Override
@@ -107,12 +112,21 @@ public class NettyChannel implements IoChannel {
         }
     }
 
+    /**
+     * 获取已有的请求
+     * @param element
+     * @return
+     */
     private RequestFuture getExistRequest(Element element) {
-        List<Map.Entry<Integer, RequestFuture>> entries = waitMap.entrySet().stream()
-                .filter(entity -> entity.getValue().getElement().equals(element))
-                .collect(Collectors.toList());
-        if (entries != null && entries.size() > 0) {
-            return entries.get(0).getValue();
+        try {
+            Map<Integer, RequestFuture> map = waitMap;
+            List<Map.Entry<Integer, RequestFuture>> entries = map.entrySet().stream()
+                    .filter(entity -> entity.getValue().getElement().equals(element))
+                    .collect(Collectors.toList());
+            if (entries != null && entries.size() > 0) {
+                return entries.get(0).getValue();
+            }
+        } catch (RuntimeException e) {
         }
         return null;
     }
@@ -131,6 +145,7 @@ public class NettyChannel implements IoChannel {
             requestFuture.setResponse(response);
         } else {
             // 超时抵达
+            logger.warn("超时抵达：{}，{}", sign, response);
         }
     }
 

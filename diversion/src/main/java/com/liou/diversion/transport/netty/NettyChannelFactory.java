@@ -2,7 +2,7 @@ package com.liou.diversion.transport.netty;
 
 import com.liou.diversion.container.Config;
 import com.liou.diversion.element.execute.DiversionService;
-import com.liou.diversion.node.AccessService;
+import com.liou.diversion.node.DiversionCluster;
 import com.liou.diversion.node.DiversionNode;
 import com.liou.diversion.transport.ChannelFactory;
 import com.liou.diversion.transport.Charset;
@@ -34,28 +34,28 @@ public class NettyChannelFactory implements ChannelFactory {
     /**
      * i/o thread count
      */
-    @Config("diversion.io.threadcount")
+    @Config("io.threadcount")
     private int ioThreadCount;
 
     /**
      * 连接最大尝试次数
      */
-    @Config("diversion.io.attempts")
+    @Config("io.attempts")
     private int connectAttempts;
     /**
      * 传输编码
      */
-    @Config("diversion.io.charset")
+    @Config("io.charset")
     private Charset charset;
     /**
      * 写闲置时间（毫秒）
      */
-    @Config("diversion.io.writidle")
+    @Config("io.writidle")
     private int writerIdleTime;
     /**
      * 读闲置时间（毫秒）
      */
-    @Config("diversion.io.readidle")
+    @Config("io.readidle")
     private int readerIdleTime;
 
     private PacketChannelHandler packetChannelHandler;
@@ -104,8 +104,8 @@ public class NettyChannelFactory implements ChannelFactory {
             @Override
             protected void initChannel(Channel ch) throws Exception {
                 ChannelPipeline pipeline = ch.pipeline();
-                pipeline.addFirst(writeIdleChannelHandler);
-                pipeline.addFirst(packetChannelHandler, serverChannelHandler, keepAliveChannelHandler);
+                pipeline.addFirst(writeIdleChannelHandler, packetChannelHandler, serverChannelHandler,
+                        keepAliveChannelHandler);
                 pipeline.addFirst(new IdleStateHandler(0, writerIdleTime, 0,
                         TimeUnit.MILLISECONDS));
             }
@@ -128,7 +128,6 @@ public class NettyChannelFactory implements ChannelFactory {
             } catch (Exception e) {
                 cause = e;
             }
-            logger.debug("try connect to {}:{} times {} failed", host, port, i + 1);
         }
         if (future != null && future.cause() != null) {
             cause = future.cause();
@@ -137,29 +136,22 @@ public class NettyChannelFactory implements ChannelFactory {
     }
 
     @Override
-    public void acceptOn(int port, AccessService accessService) throws IOException, InterruptedException {
+    public void acceptOn(int port, DiversionCluster diversionCluster) throws IOException, InterruptedException {
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(bossElg, ioElg).channel(NioServerSocketChannel.class)
                 .handler(new ChannelInboundHandlerAdapter() {
                     @Override
                     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-                        logger.info("accepted channel {}", msg);
-                        Channel channel = (Channel) msg;
-                        InetSocketAddress inetSocketAddress = (InetSocketAddress) channel.remoteAddress();
-                        String host = inetSocketAddress.getHostString();
-                        int port = inetSocketAddress.getPort();
-                        DiversionNode diversionNode = new DiversionNode(host, port);
-                        diversionNode.channel(new NettyChannel(host, port, channel));
-                        accessService.access(diversionNode);
                         ctx.fireChannelRead(msg);
+                        logger.info("accepted channel {}", msg);
                     }
                 }).childHandler(new ChannelInitializer<Channel>() {
                     @Override
                     protected void initChannel(Channel ch) throws Exception {
                         ChannelPipeline pipeline = ch.pipeline();
-                        pipeline.addFirst(readIdleChannelHandler);
-                        pipeline.addFirst(packetChannelHandler, serverChannelHandler);
-                        pipeline.addFirst(new IdleStateHandler(readerIdleTime, 0, 0, TimeUnit.MILLISECONDS));
+                        pipeline.addFirst(readIdleChannelHandler, packetChannelHandler, serverChannelHandler);
+                        pipeline.addFirst(new IdleStateHandler(readerIdleTime, 0, 0,
+                                TimeUnit.MILLISECONDS));
                     }
                 });
         serverBootstrap.bind(new InetSocketAddress(port));

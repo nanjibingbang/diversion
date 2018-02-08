@@ -77,4 +77,8 @@ public class RequestFuture {
         notifyAll();
     }
 
+    public static int currentRequestSign() {
+        return generated.get();
+    }
+
 }

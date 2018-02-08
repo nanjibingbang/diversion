@@ -29,10 +29,8 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
                 NettyChannel nettyChannel = ctx.channel().attr(NettyChannel.ATTRKEY_IOCHANNEL).get();
                 nettyChannel.result(packet.getUuid(), deserialized);
             } else {
-                Attribute<Object> nodeAttr = ctx.channel().attr(AttributeKey.valueOf("node"));
-                DiversionNode requestNode = (DiversionNode) nodeAttr.get();
                 Element element = (Element) deserialized;
-                diversionService.executeUpdate(requestNode, packet.getUuid(), element);
+                diversionService.executeUpdate(ctx.channel(), packet.getUuid(), element);
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -19,7 +19,7 @@ public class DefaultTransientProvider implements TransientProvider {
     /**
      * 暂留时间
      */
-    @Config("diversion.cache.transienttime")
+    @Config("cache.transienttime")
     private int transientTime;
 
     private Map<Element, TransientResult> transientMap;

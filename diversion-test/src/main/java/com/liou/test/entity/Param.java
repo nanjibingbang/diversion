@@ -9,11 +9,11 @@ import java.io.Serializable;
  */
 public class Param implements Serializable {
     private String str;
-    private Integer i;
+    private double i;
     private char c;
     private boolean b;
 
-    public Param(String str, Integer i, char c, boolean b) {
+    public Param(String str, double i, char c, boolean b) {
         this.str = str;
         this.i = i;
         this.c = c;
@@ -28,11 +28,11 @@ public class Param implements Serializable {
         this.str = str;
     }
 
-    public Integer getI() {
+    public double getI() {
         return i;
     }
 
-    public void setI(Integer i) {
+    public void setI(double i) {
         this.i = i;
     }
 

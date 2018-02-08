@@ -35,12 +35,15 @@ public class ElementTaskExecutor implements Destroyable {
     }
 
     public ElementUpdateTask execute(Element element, ExecuteContext executeContext) throws Exception {
-        List<Runnable> collect = blockingQueue.stream().filter(o -> {
-            ElementUpdateTask origin = (ElementUpdateTask) o;
-            return origin.getElement().equals(element) && origin.addContext(executeContext);
-        }).collect(Collectors.toList());
-        if (collect != null && collect.size() > 0) {
-            return (ElementUpdateTask) collect.get(0);
+        try {
+            List<Runnable> collect = blockingQueue.stream().filter(o -> {
+                ElementUpdateTask origin = (ElementUpdateTask) o;
+                return origin.getElement().equals(element) && origin.addContext(executeContext);
+            }).collect(Collectors.toList());
+            if (collect != null && collect.size() > 0) {
+                return (ElementUpdateTask) collect.get(0);
+            }
+        } catch (RuntimeException e) {
         }
         ElementUpdateTask elementUpdateTask = createElementUpdateTask(element);
         elementUpdateTask.addContext(executeContext);

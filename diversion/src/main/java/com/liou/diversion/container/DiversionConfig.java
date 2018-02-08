@@ -1,9 +1,9 @@
 package com.liou.diversion.container;
 
+import com.liou.diversion.transport.Charset;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import com.liou.diversion.transport.Charset;
 
 public class DiversionConfig {
 
@@ -12,10 +12,6 @@ public class DiversionConfig {
          * 当前节点名称
          */
         NAME("diversion.localname", "", String.class),
-        /**
-         * 节点集合（name_ip[:port]）
-         */
-        NODES("diversion.nodes", "", String.class),
         /**
          * 监听端口 默认33585
          */
@@ -75,7 +71,11 @@ public class DiversionConfig {
         /**
          * zk重连最大重试次数
          */
-        ZOOKEEPER_MAX_ATTEMPTS("diversion.zookeeper.attempts", 1000, Integer.class);
+        ZOOKEEPER_MAX_ATTEMPTS("diversion.zookeeper.attempts", 1000, Integer.class),
+        /**
+         * session timeout 接入超时
+         */
+        ACCESS_SESSION_TIMEOUT("diversion.session.timeout", 1000, Long.class);
 
         private String sign;
         private Object defValue;
@@ -92,6 +92,7 @@ public class DiversionConfig {
 
         /**
          * 配置标识
+         *
          * @return
          */
         public String sign() {
@@ -126,10 +127,9 @@ public class DiversionConfig {
 
     /**
      * 保存配置
-     * 
+     *
      * @param config
-     * @param value
-     *            必须是确定类型
+     * @param value  必须是确定类型
      */
     public void addConfig(Configs config, Object value) {
         configMap.put(config, value != null ? value : config.defValue());
@@ -141,6 +141,9 @@ public class DiversionConfig {
     }
 
     public Object getConfig(String configName) {
+        if (!configName.startsWith("diversion.")) {
+            configName = "diversion." + configName;
+        }
         Configs config = Configs.formSign(configName);
         if (config != null) {
             Object result = configMap.get(config);

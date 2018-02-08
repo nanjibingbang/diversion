@@ -3,12 +3,12 @@ package com.liou.test;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 
-import redis.clients.jedis.Jedis;
+public class JedisPoolFactory implements FactoryBean<JedisPool>, InitializingBean {
 
-public class JedisFactory implements FactoryBean<Jedis>, InitializingBean {
-
-    private Jedis jedis;
+    private JedisPool jedisPool;
 
     private Integer port;
 
@@ -31,13 +31,13 @@ public class JedisFactory implements FactoryBean<Jedis>, InitializingBean {
     }
 
     @Override
-    public Jedis getObject() throws Exception {
-        return jedis;
+    public JedisPool getObject() throws Exception {
+        return jedisPool;
     }
 
     @Override
     public Class<?> getObjectType() {
-        return Jedis.class;
+        return JedisPool.class;
     }
 
     @Override
@@ -50,7 +50,8 @@ public class JedisFactory implements FactoryBean<Jedis>, InitializingBean {
         if (port == null || StringUtils.isBlank(host)) {
             throw new IllegalArgumentException("port, host");
         }
-        jedis = new Jedis(host, port);
+        JedisPoolConfig config = new JedisPoolConfig();
+        jedisPool = new JedisPool(config, host, port);
     }
 
 }

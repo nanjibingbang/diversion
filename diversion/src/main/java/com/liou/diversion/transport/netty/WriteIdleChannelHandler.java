@@ -72,7 +72,7 @@ public class WriteIdleChannelHandler extends ExceptionChannelHandler {
         DiversionCluster cluster = channel.attr(AttributeKey.<DiversionCluster> valueOf("cluster")).get();
         DiversionNode node = channel.attr(AttributeKey.<DiversionNode> valueOf("node")).get();
         if (cluster != null && node != null) {
-            cluster.removeNode(node);
+            cluster.nodeUnreachable(node, true);
         }
     }
 

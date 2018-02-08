@@ -52,7 +52,7 @@ public class ApplicationServlet extends HttpServlet {
         DataService bean = webApplicationContext.getBean(DataService.class);
         Result data = null;
         try {
-            Param param = new Param(req.getParameter("title"), 1221, 's', true);
+            Param param = new Param(req.getParameter("title"), Math.random(), 's', true);
             data = bean.getData(param);
         } catch (RuntimeException e) {
             e.printStackTrace();

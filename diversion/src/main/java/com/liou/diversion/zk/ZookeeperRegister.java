@@ -1,7 +1,11 @@
 package com.liou.diversion.zk;
 
+import com.liou.diversion.container.Config;
 import com.liou.diversion.container.Initialization;
 import com.liou.diversion.node.DiversionCluster;
+import com.liou.diversion.transport.Charset;
+
+import java.util.List;
 
 /**
  * Content : zookeeper注册中心
@@ -12,8 +16,10 @@ public class ZookeeperRegister implements Initialization {
 
     private ZookeeperClient zookeeperClient;
     private String clusterPath;
-
     private DiversionCluster diversionCluster;
+
+    @Config("io.charset")
+    private Charset charset;
 
     public ZookeeperRegister() {
     }
@@ -21,12 +27,20 @@ public class ZookeeperRegister implements Initialization {
     @Override
     public void init() throws Exception {
         clusterPath = zookeeperClient.createPersistent(null, diversionCluster.getPath(), "diversion_cluster_data".getBytes());
+        List<String> children = zookeeperClient.getChildren(clusterPath);
+        diversionCluster.build(children);
         registerThis();
         new NodeWatcher(diversionCluster, zookeeperClient.getClient());
     }
 
+    /**
+     * 在zookeeper注册本节点信息
+     *
+     * @throws Exception
+     */
     private void registerThis() throws Exception {
-        zookeeperClient.createEphemeral(clusterPath, diversionCluster.getLocalNodeString(), new byte[]{0});
+        String localNodeString = diversionCluster.getLocalNodeString();
+        zookeeperClient.createEphemeral(clusterPath, localNodeString, localNodeString.getBytes(charset.charset()));
     }
 
     public String getClusterPath() {

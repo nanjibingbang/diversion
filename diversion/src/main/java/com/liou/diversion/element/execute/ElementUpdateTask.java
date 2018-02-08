@@ -2,8 +2,10 @@ package com.liou.diversion.element.execute;
 
 import com.liou.diversion.element.Element;
 import com.liou.diversion.element.ElementUpdater;
-import com.liou.diversion.element.ElementUpdaterRepository;
 import com.liou.diversion.element.cache.TransientProvider;
+import com.liou.diversion.transport.packet.Packet;
+import com.liou.diversion.utils.HessianUtils;
+import io.netty.channel.ChannelFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +42,7 @@ public class ElementUpdateTask implements Runnable {
 
     protected boolean addContext(ExecuteContext executeContext) {
         synchronized (contexts) {
-            if(isDone()) {
+            if (isDone()) {
                 return false;
             }
             if (executeContext != null && !contexts.contains(executeContext)) {
@@ -64,11 +66,12 @@ public class ElementUpdateTask implements Runnable {
         } finally {
             done = true;
             synchronized (contexts) {
-                for (int i = 0; i < contexts.size(); i++) {
-                    ExecuteContext executeContext = contexts.get(i);
-                    executeContext.diversionNode.responseUpdated(result, executeContext.sign);
-                }
+                contexts.forEach(executeContext -> {
+                    Packet packet = HessianUtils.serialize(result, executeContext.sign).setResp();
+                    executeContext.channel.writeAndFlush(packet);
+                });
             }
+            // 唤醒本地同步获取
             synchronized (this) {
                 notifyAll();
             }
@@ -91,14 +94,14 @@ public class ElementUpdateTask implements Runnable {
      * @return
      */
     public synchronized Object get(long timeout) throws TimeoutException {
-        if(!isDone()) {
+        if (!isDone()) {
             try {
                 wait(timeout);
             } catch (InterruptedException e) {
                 throw new RuntimeException(String.format("sync request error %s", element), e);
             }
         }
-        if(!isDone()) {
+        if (!isDone()) {
             throw new TimeoutException(String.format("更新:%s 超时", element));
         }
         return result;

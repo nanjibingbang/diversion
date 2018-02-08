@@ -7,6 +7,9 @@ import com.liou.diversion.element.cache.TransientResult;
 import com.liou.diversion.node.DiversionCluster;
 import com.liou.diversion.node.DiversionNode;
 import com.liou.diversion.transport.ChannelIoException;
+import com.liou.diversion.transport.packet.Packet;
+import com.liou.diversion.utils.HessianUtils;
+import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +25,7 @@ public class DiversionService {
     private TransientProvider transientProvider;
     private ElementTaskExecutor elementTaskExecutor;
 
-    @Config("diversion.request.timeout")
+    @Config("request.timeout")
     private long requestTimeout;
 
     /**
@@ -81,17 +84,18 @@ public class DiversionService {
     /**
      * Element更新请求
      *
-     * @param diversionNode 请求节点
-     * @param sign          请求标识
-     * @param element       请求内容
+     * @param channel 请求channel
+     * @param sign    请求标识
+     * @param element 请求内容
      * @return
      */
-    public void executeUpdate(DiversionNode diversionNode, int sign, Element element) {
+    public void executeUpdate(Channel channel, int sign, Element element) {
         Object result = transientProvider.get(element);
         if (result != null) {
-            diversionNode.responseUpdated(result, sign);
+            Packet packet = HessianUtils.serialize(result, sign).setResp();
+            channel.writeAndFlush(packet);
         } else {
-            ExecuteContext executeContext = new ExecuteContext(sign, diversionNode);
+            ExecuteContext executeContext = new ExecuteContext(sign, channel);
             try {
                 elementTaskExecutor.execute(element, executeContext);
             } catch (Exception e) {

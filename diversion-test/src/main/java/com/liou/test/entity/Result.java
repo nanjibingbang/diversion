@@ -1,6 +1,8 @@
 package com.liou.test.entity;
 
 import java.io.Serializable;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Content :
@@ -9,13 +11,13 @@ import java.io.Serializable;
  */
 public class Result implements Serializable {
     private String str;
-    private Integer i;
+    private double i;
     private char c;
     private boolean b;
 
     public Result() {}
 
-    public Result(String str, Integer i, char c, boolean b) {
+    public Result(String str, double i, char c, boolean b) {
         this.str = str;
         this.i = i;
         this.c = c;
@@ -30,11 +32,11 @@ public class Result implements Serializable {
         this.str = str;
     }
 
-    public Integer getI() {
+    public double getI() {
         return i;
     }
 
-    public void setI(Integer i) {
+    public void setI(double i) {
         this.i = i;
     }
 
@@ -53,4 +55,5 @@ public class Result implements Serializable {
     public void setB(boolean b) {
         this.b = b;
     }
+
 }

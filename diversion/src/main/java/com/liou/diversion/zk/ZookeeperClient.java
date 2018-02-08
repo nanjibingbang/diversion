@@ -3,6 +3,7 @@ package com.liou.diversion.zk;
 import com.liou.diversion.container.Config;
 import com.liou.diversion.container.Destroyable;
 import com.liou.diversion.container.Initialization;
+import com.liou.diversion.transport.Charset;
 import org.apache.commons.lang.StringUtils;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -12,6 +13,9 @@ import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Content:
@@ -23,14 +27,16 @@ public class ZookeeperClient implements Initialization, Destroyable{
 
     private CuratorFramework client;
 
-    @Config("diversion.zookeeper.servers")
+    @Config("zookeeper.servers")
     private String zkServers;
-    @Config("diversion.zookeeper.sessiontimeout")
+    @Config("zookeeper.sessiontimeout")
     private int zkSessionTimeout;
-    @Config("diversion.zookeeper.connecttimeout")
+    @Config("zookeeper.connecttimeout")
     private int zkConnectionTimeout;
-    @Config("diversion.zookeeper.attempts")
+    @Config("zookeeper.attempts")
     private int zkMaxAttempts;
+    @Config("io.charset")
+    private Charset charset;
 
     public ZookeeperClient() {
     }
@@ -74,6 +80,35 @@ public class ZookeeperClient implements Initialization, Destroyable{
             logger.warn("delete node {}", path, e);
         }
         return false;
+    }
+
+    public List<String> getChildren(String path) {
+        try {
+            return client.getChildren().forPath(path);
+        } catch (Exception e) {
+            logger.warn("get children for path{}", path, e);
+        }
+        return new ArrayList<>();
+    }
+
+    public boolean setData(String data, String path) {
+        try {
+            client.setData().forPath(path, data.getBytes(charset.charset()));
+            return true;
+        } catch (Exception e) {
+            logger.warn("set data for path{}", path, e);
+        }
+        return false;
+    }
+
+    public String getData(String path) {
+        try {
+            byte[] bytes = client.getData().forPath(path);
+            return new String(bytes, charset.charset());
+        } catch (Exception e) {
+            logger.warn("get data for path{}", path, e);
+        }
+        return null;
     }
 
     public CuratorFramework getClient() {

@@ -13,13 +13,23 @@ public interface Container {
 
     /**
      * 根据名称从容器中获取对象
+     *
      * @param name
      * @return
      */
-    Object getObject(String name);
+    <T> T getInstance(String name);
+
+    /**
+     * 创建实例
+     * @param clazz
+     * @param <T>
+     * @return
+     */
+    <T> T newInstance(Class<T> clazz) throws Exception;
 
     /**
      * 根据element相关信息从容器获取Updater
+     *
      * @param element
      * @return
      */

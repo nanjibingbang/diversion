@@ -1,9 +1,11 @@
 package com.liou.diversion.container.spring;
 
 import com.liou.diversion.container.Container;
+import com.liou.diversion.container.DiversionConfig;
 import com.liou.diversion.element.Element;
 import com.liou.diversion.element.ElementUpdater;
 import com.liou.diversion.element.ElementUpdaterProxy;
+import com.liou.diversion.utils.ConfigUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -21,8 +23,16 @@ public class SpringContainer implements Container, ApplicationContextAware {
     private ApplicationContext applicationContext;
 
     @Override
-    public Object getObject(String name) {
-        return applicationContext.getBean(name);
+    @SuppressWarnings("unchecked")
+    public <T> T getInstance(String name) {
+        return (T) applicationContext.getBean(name);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T newInstance(Class<T> clazz) throws Exception {
+        DiversionConfig diversionConfig = applicationContext.getBean(DiversionConfig.class);
+        return (T) ConfigUtils.applyConfig(clazz.newInstance(), diversionConfig);
     }
 
     @Override
@@ -41,7 +51,7 @@ public class SpringContainer implements Container, ApplicationContextAware {
         }
         Class[] medTypes = clazzs.toArray(new Class[clazzs.size()]);
         try {
-            Object object = getObject(element.getTagCla());
+            Object object = getInstance(element.getTagCla());
             return new ElementUpdaterProxy(object, element.getTagCla(),
                     element.getTagMed(), medTypes);
         } catch (Exception e) {

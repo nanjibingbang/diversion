@@ -10,7 +10,7 @@
 
 	<context:component-scan base-package="com.liou.test" />
 
-	<bean class="com.liou.test.JedisFactory">
+	<bean class="com.liou.test.JedisPoolFactory">
 		<property name="host" value="${redis.host}" />
 		<property name="port" value="${redis.port}" />
 	</bean>
