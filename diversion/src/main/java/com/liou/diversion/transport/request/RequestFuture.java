@@ -20,9 +20,9 @@ public class RequestFuture {
     private volatile boolean done;
 
     private Object response;
-    private Element element;
-    private Packet requestContent;
-    private int requestSign;
+    private final Element element;
+    private final Packet requestContent;
+    private final int requestSign;
 
     public RequestFuture(Element element) {
         done = false;

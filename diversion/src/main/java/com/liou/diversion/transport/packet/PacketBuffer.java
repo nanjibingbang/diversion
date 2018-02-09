@@ -78,14 +78,14 @@ public class PacketBuffer {
         return this;
     }
 
-    public PacketBuffer append(final byte[] bs) {
+    public PacketBuffer append(byte[] bs) {
         if (bs == null) {
             throw new IllegalArgumentException();
         }
         return append(bs, 0, bs.length);
     }
 
-    public PacketBuffer append(final byte[] bs, int offset, int len) {
+    public PacketBuffer append(byte[] bs, int offset, int len) {
         if (bs == null || offset < 0 || offset + len > bs.length) {
             throw new IllegalArgumentException();
         }

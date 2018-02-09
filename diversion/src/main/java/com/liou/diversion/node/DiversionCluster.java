@@ -92,7 +92,7 @@ public class DiversionCluster implements ChildrenChangeHandler, Destroyable {
                 return addr.getHostAddress();
             }
         }
-        throw new SocketException("Can't get local ip address, interfaces are: " + interfaces);
+        throw new SocketException("获取不到本地IP地址，确认拥有IPv4网卡, 所有网卡: " + interfaces);
     }
 
     public boolean isLocalNode(DiversionNode diversionNode) {
@@ -207,6 +207,11 @@ public class DiversionCluster implements ChildrenChangeHandler, Destroyable {
         return node != null && (isLocalNode(node) || node.isReady());
     }
 
+    /**
+     * 不可达节点处理
+     * @param diversionNode
+     * @param close 是否主动关闭
+     */
     public void nodeUnreachable(DiversionNode diversionNode, boolean close) {
         removeNode(diversionNode, close);
     }
@@ -231,8 +236,6 @@ public class DiversionCluster implements ChildrenChangeHandler, Destroyable {
      * @throws IOException
      */
     public void nodeReconnect(DiversionNode diversionNode) throws IOException {
-        // 将监听端口同时作为连接端口
-//        InetSocketAddress localAddress = new InetSocketAddress(localHost, listenPort);
         IoChannel ioChannel = channelFactory.reconnect(diversionNode.channel(), null);
         diversionNode.channel(ioChannel);
         if (!addNode(diversionNode)) { // 节点集已包含只是替换io channel
@@ -256,7 +259,7 @@ public class DiversionCluster implements ChildrenChangeHandler, Destroyable {
      * @return
      */
     public String clusterInfo() {
-        JSONObject jo = new JSONObject();
+        final JSONObject jo = new JSONObject();
         nodeSet.forEach(node -> jo.put(node.getKey(), isReady(node)
                 ? "ready" : "not ready"));
         return jo.toString();

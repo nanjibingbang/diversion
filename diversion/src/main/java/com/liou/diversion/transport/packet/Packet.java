@@ -132,7 +132,7 @@ public class Packet {
     public final byte[] packing() {
         int len = 2 + lenBytes.length + (payload == null ? 0 : payload.length);
         byte[] result = new byte[len];
-        result[0] = (byte) ((head & 0xff00) >> 8);
+        result[0] = (byte) (head >> 8);
         result[1] = (byte) (head & 0xff);
         int destPos = 2;
         System.arraycopy(lenBytes, 0, result, destPos, lenBytes.length);
