@@ -1,6 +1,7 @@
 package com.liou.diversion.container;
 
 import com.liou.diversion.transport.Charset;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -108,9 +109,14 @@ public class DiversionConfig {
         }
 
         public static Configs formSign(String sign) {
+            if (StringUtils.isBlank(sign)) {
+                return null;
+            }
             Configs[] values = Configs.values();
             for (Configs config : values) {
                 if (config.sign.equals(sign)) {
+                    return config;
+                } else if (!sign.startsWith("diversion.") && config.sign.indexOf(sign) == 10) {
                     return config;
                 }
             }
@@ -141,9 +147,6 @@ public class DiversionConfig {
     }
 
     public Object getConfig(String configName) {
-        if (!configName.startsWith("diversion.")) {
-            configName = "diversion." + configName;
-        }
         Configs config = Configs.formSign(configName);
         if (config != null) {
             Object result = configMap.get(config);

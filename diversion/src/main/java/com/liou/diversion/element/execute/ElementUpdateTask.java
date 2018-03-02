@@ -5,7 +5,6 @@ import com.liou.diversion.element.ElementUpdater;
 import com.liou.diversion.element.cache.TransientProvider;
 import com.liou.diversion.transport.packet.Packet;
 import com.liou.diversion.utils.HessianUtils;
-import io.netty.channel.ChannelFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +28,8 @@ public class ElementUpdateTask implements Runnable {
     private Exception cause;
     private volatile boolean done;
 
+    private ExecuteStateListener executeStateListener;
+
     private TransientProvider transientProvider;
     private ElementUpdater elementUpdater;
 
@@ -38,6 +39,10 @@ public class ElementUpdateTask implements Runnable {
         this.element = element;
         this.transientProvider = transientProvider;
         this.elementUpdater = elementUpdater;
+    }
+
+    protected void registerExecuteStateListener(ExecuteStateListener executeStateListener) {
+        this.executeStateListener = executeStateListener;
     }
 
     protected boolean addContext(ExecuteContext executeContext) {
@@ -65,17 +70,23 @@ public class ElementUpdateTask implements Runnable {
             result = null;
         } finally {
             done = true;
-            synchronized (contexts) {
-                contexts.forEach(executeContext -> {
-                    Packet packet = HessianUtils.serialize(result, executeContext.sign).setResp();
-                    executeContext.channel.writeAndFlush(packet);
-                });
-            }
-            // 唤醒本地同步获取
-            synchronized (this) {
-                notifyAll();
-            }
+            executeStateListener.stateChange(ExecuteStatePool.State.EXECUTE_STATE_DONE, this);
+            afterRun();
             logger.debug("update element {}", element, cause);
+        }
+    }
+
+    protected void afterRun() {
+        // 回传结果
+        synchronized (contexts) {
+            contexts.forEach(executeContext -> {
+                Packet packet = HessianUtils.serialize(result, executeContext.sign).setResp();
+                executeContext.channel.writeAndFlush(packet);
+            });
+        }
+        // 唤醒本地同步获取
+        synchronized (this) {
+            notifyAll();
         }
     }
 
@@ -118,6 +129,11 @@ public class ElementUpdateTask implements Runnable {
 
     public Element getElement() {
         return element;
+    }
+
+    @Override
+    public int hashCode() {
+        return element.hashCode();
     }
 
     @Override

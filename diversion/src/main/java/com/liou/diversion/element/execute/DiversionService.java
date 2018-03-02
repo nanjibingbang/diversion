@@ -61,7 +61,11 @@ public class DiversionService {
             transientProvider.record(result, element);
             return result;
         } finally {
-            logger.debug("time spend:{}ms", System.currentTimeMillis() - begin);
+            long arg = System.currentTimeMillis() - begin;
+            if (arg > 50) {
+                logger.error("time spend:{}ms", arg);
+            }
+            logger.debug("time spend:{}ms", arg);
         }
     }
 

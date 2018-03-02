@@ -11,7 +11,7 @@ public class ByteUtils {
         int result = 0;
         int end = offset + len;
         for (int i = end; i > offset; i--) {
-            result += Byte.toUnsignedInt(bs[i - 1]) << (Byte.SIZE * (end - i));
+            result |= Byte.toUnsignedInt(bs[i - 1]) << (Byte.SIZE * (end - i));
         }
         return result;
     }
@@ -19,16 +19,15 @@ public class ByteUtils {
     /**
      * 
      * @param num
-     *            大于0
      * @param fix4Byte 是否固定4字节
      * @return
      */
     public static byte[] toBytes(int num, boolean fix4Byte) {
         byte[] bs = new byte[Integer.BYTES];
         int index = Integer.BYTES - 1;
-        while (num > 0) {
+        while (num != 0) {
             bs[index--] = (byte) (num & 0xff);
-            num = num >> Byte.SIZE;
+            num = num >>> Byte.SIZE;
         }
         if (fix4Byte) {
             return bs;

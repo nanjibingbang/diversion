@@ -1,5 +1,6 @@
 package com.liou.diversion.element.execute;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.liou.diversion.container.Container;
 import com.liou.diversion.container.Destroyable;
 import com.liou.diversion.container.spring.GetElementUpdaterException;
@@ -9,12 +10,8 @@ import com.liou.diversion.element.ElementUpdaterRepository;
 import com.liou.diversion.element.cache.TransientProvider;
 import org.apache.commons.lang.StringUtils;
 
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import java.util.concurrent.*;
+
 
 /**
  * ElementTask队列运行管理,结合暂存器解决重复缓存更新
@@ -25,27 +22,28 @@ public class ElementTaskExecutor implements Destroyable {
 
     private ExecutorService executorService;
     private LinkedBlockingQueue<Runnable> blockingQueue;
+    private ExecuteStatePool executeStatePool;
 
     private TransientProvider transientProvider;
     private Container container;
 
     public ElementTaskExecutor() {
+        executeStatePool = new ExecuteStatePool();
         blockingQueue = new LinkedBlockingQueue<>();
-        executorService = new ThreadPoolExecutor(0, 32, 1, TimeUnit.MINUTES, blockingQueue);
+        ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("element-update-%d").build();
+        executorService = new ThreadPoolExecutor(4, 32, 1,
+                TimeUnit.MINUTES, blockingQueue, threadFactory);
     }
 
     public ElementUpdateTask execute(Element element, ExecuteContext executeContext) throws Exception {
-        try {
-            List<Runnable> collect = blockingQueue.stream().filter(o -> {
-                ElementUpdateTask origin = (ElementUpdateTask) o;
-                return origin.getElement().equals(element) && origin.addContext(executeContext);
-            }).collect(Collectors.toList());
-            if (collect != null && collect.size() > 0) {
-                return (ElementUpdateTask) collect.get(0);
-            }
-        } catch (RuntimeException e) {
+        ElementUpdateTask elementUpdateTask;
+        elementUpdateTask = executeStatePool.findAndAppendElement(element, executeContext);
+        if (elementUpdateTask != null) {
+            return elementUpdateTask;
         }
-        ElementUpdateTask elementUpdateTask = createElementUpdateTask(element);
+        elementUpdateTask = createElementUpdateTask(element);
+        executeStatePool.stateChange(ExecuteStatePool.State.EXECUTE_STATE_NEW, elementUpdateTask);
+        elementUpdateTask.registerExecuteStateListener(executeStatePool);
         elementUpdateTask.addContext(executeContext);
         executorService.execute(elementUpdateTask);
         return elementUpdateTask;
@@ -63,6 +61,9 @@ public class ElementTaskExecutor implements Destroyable {
         if (elementUpdater == null && StringUtils.isNotBlank(element.getTagCla()) && StringUtils.isNotBlank(element.getTagMed())) {
             elementUpdater = container.getElementUpdater(element);
             ElementUpdaterRepository.registeElementUpdater(elementUpdater);
+        }
+        if (elementUpdater == null) {
+            throw new RuntimeException("没有找到适配的ElementUpdater");
         }
         return new ElementUpdateTask(element, elementUpdater, transientProvider);
     }
