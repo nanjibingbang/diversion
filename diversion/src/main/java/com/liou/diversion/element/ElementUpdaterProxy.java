@@ -33,16 +33,19 @@ public class ElementUpdaterProxy implements ElementUpdater {
 
     @Override
     public boolean adapter(Element element) {
-        boolean nameEquals = tagCla.equals(element.getTagCla()) && tagMed.equals(element.getTagMed());
-        if (medTypes.length != element.getParams().length) {
-            return false;
-        }
-        for (int i = 0; i < medTypes.length; i++) {
-            if(medTypes[i] != element.getParams()[i].getClass()) {
+        boolean tagEquals = tagCla.equals(element.getTagCla()) && tagMed.equals(element.getTagMed());
+        if (tagEquals) {
+            if (medTypes.length != element.getParams().length) {
                 return false;
             }
+            for (int i = 0; i < medTypes.length; i++) {
+                if(medTypes[i] != element.getParams()[i].getClass()) {
+                    return false;
+                }
+            }
+            return true;
         }
-        return nameEquals;
+        return false;
     }
 
 }

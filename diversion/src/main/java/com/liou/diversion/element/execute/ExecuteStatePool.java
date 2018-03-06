@@ -31,10 +31,18 @@ public class ExecuteStatePool implements ExecuteStateListener {
         stateMap = new HashMap<>();
     }
 
+    /**
+     * 从状态池获取task并添加context
+     * @param element
+     * @param executeContext
+     * @return
+     */
     public ElementUpdateTask findAndAppendElement(Element element, ExecuteContext executeContext) {
         synchronized (stateMap) {
-            Optional<ElementUpdateTask> any = stateMap.entrySet().stream().filter(entry -> entry.getKey().getElement().equals(element)
-                    && (entry.getValue().get() == State.EXECUTE_STATE_NEW)).map(Map.Entry::getKey).findAny();
+            Optional<ElementUpdateTask> any = stateMap.entrySet().stream()
+                    .filter(entry -> entry.getKey().getElement().equals(element)
+                            && (entry.getValue().get() == State.EXECUTE_STATE_NEW))
+                    .map(Map.Entry::getKey).findAny();
             if (any.isPresent() && any.get().addContext(executeContext)) {
                 return any.get();
             }

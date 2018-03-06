@@ -36,8 +36,7 @@ public class ElementTaskExecutor implements Destroyable {
     }
 
     public ElementUpdateTask execute(Element element, ExecuteContext executeContext) throws Exception {
-        ElementUpdateTask elementUpdateTask;
-        elementUpdateTask = executeStatePool.findAndAppendElement(element, executeContext);
+        ElementUpdateTask elementUpdateTask = executeStatePool.findAndAppendElement(element, executeContext);
         if (elementUpdateTask != null) {
             return elementUpdateTask;
         }
