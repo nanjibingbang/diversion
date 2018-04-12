@@ -27,7 +27,7 @@ public class NodeWatcher implements CuratorWatcher {
 
     public List<String> autoWatch() throws Exception {
         if (CuratorFrameworkState.STARTED == client.getState()) {
-            List<String> result = client.getChildren().usingWatcher(this).forPath(childrenChangeHandler.getPath());
+            List<String> result = client.getChildren().usingWatcher(this).forPath(childrenChangeHandler.getNamespace());
             return result == null ? new ArrayList<>() : result;
         }
         return children;

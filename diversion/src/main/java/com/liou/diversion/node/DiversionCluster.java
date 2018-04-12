@@ -42,8 +42,8 @@ public class DiversionCluster implements ChildrenChangeHandler, Destroyable {
 
     private ChannelFactory channelFactory;
 
-    @Config("zookeeper.root")
-    private String regRoot;
+    @Config(value = "zookeeper.namespace", nullable = false)
+    private String zkNamespace;
 
     public DiversionCluster() throws SocketException {
         this.localHost = getLocalHost();
@@ -282,8 +282,8 @@ public class DiversionCluster implements ChildrenChangeHandler, Destroyable {
     }
 
     @Override
-    public String getPath() {
-        return regRoot;
+    public String getNamespace() {
+        return zkNamespace;
     }
 
     @Override

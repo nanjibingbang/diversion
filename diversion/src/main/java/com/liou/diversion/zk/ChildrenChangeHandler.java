@@ -14,7 +14,7 @@ public interface ChildrenChangeHandler {
      *
      * @return
      */
-    String getPath();
+    String getNamespace();
 
     void build(List<String> children) throws Exception;
 

@@ -14,6 +14,8 @@ import java.util.List;
  */
 public class ZookeeperRegister implements Initialization {
 
+    public static final String REGISTER_ZK_ROOT = "/diversion";
+
     private ZookeeperClient zookeeperClient;
     private String clusterPath;
     private DiversionCluster diversionCluster;
@@ -26,7 +28,8 @@ public class ZookeeperRegister implements Initialization {
 
     @Override
     public void init() throws Exception {
-        clusterPath = zookeeperClient.createPersistent(null, diversionCluster.getPath(), "diversion_cluster_data".getBytes());
+        clusterPath = zookeeperClient.createPersistent(null, REGISTER_ZK_ROOT, "diversion".getBytes());
+        clusterPath = zookeeperClient.createPersistent(clusterPath, diversionCluster.getNamespace(), diversionCluster.getNamespace().getBytes());
         List<String> children = zookeeperClient.getChildren(clusterPath);
         diversionCluster.build(children);
         registerThis();

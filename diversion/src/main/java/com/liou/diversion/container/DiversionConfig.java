@@ -54,9 +54,9 @@ public class DiversionConfig {
          */
         REQUEST_TIMEOUT("diversion.request.timeout", 3000, Integer.class),
         /**
-         * zk根节点名称
+         * zk namespace
          */
-        REG_ROOT("diversion.zookeeper.root", "/diversion", String.class),
+        NAMESPACE("diversion.zookeeper.namespace", null, String.class),
         /**
          * zk服务列表
          */
