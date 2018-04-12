@@ -18,16 +18,18 @@ public class NodeWatcher implements CuratorWatcher {
     private CuratorFramework client;
     private List<String> children;
     private ChildrenChangeHandler childrenChangeHandler;
+    private String parentPath;
 
-    public NodeWatcher(ChildrenChangeHandler childrenChangeHandler, CuratorFramework client) throws Exception {
+    public NodeWatcher(ChildrenChangeHandler childrenChangeHandler, CuratorFramework client, String parent) throws Exception {
         this.client = client;
         this.childrenChangeHandler = childrenChangeHandler;
+        this.parentPath = parent;
         children = autoWatch();
     }
 
     public List<String> autoWatch() throws Exception {
         if (CuratorFrameworkState.STARTED == client.getState()) {
-            List<String> result = client.getChildren().usingWatcher(this).forPath(childrenChangeHandler.getNamespace());
+            List<String> result = client.getChildren().usingWatcher(this).forPath(parentPath);
             return result == null ? new ArrayList<>() : result;
         }
         return children;

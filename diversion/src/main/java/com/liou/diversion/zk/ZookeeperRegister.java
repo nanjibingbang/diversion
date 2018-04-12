@@ -33,7 +33,7 @@ public class ZookeeperRegister implements Initialization {
         List<String> children = zookeeperClient.getChildren(clusterPath);
         diversionCluster.build(children);
         registerThis();
-        new NodeWatcher(diversionCluster, zookeeperClient.getClient());
+        new NodeWatcher(diversionCluster, zookeeperClient.getClient(), clusterPath);
     }
 
     /**
