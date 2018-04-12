@@ -21,4 +21,6 @@ public @interface Config {
      */
     String value();
 
+    boolean nullable() default true;
+
 }

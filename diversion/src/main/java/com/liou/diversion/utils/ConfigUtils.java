@@ -1,6 +1,7 @@
 package com.liou.diversion.utils;
 
 import com.liou.diversion.container.Config;
+import com.liou.diversion.container.ConfigApplyException;
 import com.liou.diversion.container.DiversionConfig;
 
 import java.lang.reflect.Field;
@@ -19,6 +20,9 @@ public class ConfigUtils {
             if (annotation != null) {
                 String config = annotation.value();
                 Object value = diversionConfig.getConfig(config);
+                if (value == null && !annotation.nullable()) {
+                    throw new ConfigApplyException(annotation.value() + "can't be null");
+                }
                 field.setAccessible(true);
                 field.set(instance, value);
             }
