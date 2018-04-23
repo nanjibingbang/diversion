@@ -80,7 +80,12 @@ public class ElementUpdateTask implements Runnable {
         // 回传结果
         synchronized (contexts) {
             contexts.forEach(executeContext -> {
-                Packet packet = HessianUtils.serialize(result, executeContext.sign).setResp();
+                Packet packet;
+                if (result == null) {
+                    packet = HessianUtils.serialize(cause, executeContext.sign).response();
+                } else {
+                    packet = HessianUtils.serialize(result, executeContext.sign).response();
+                }
                 executeContext.channel.writeAndFlush(packet);
             });
         }

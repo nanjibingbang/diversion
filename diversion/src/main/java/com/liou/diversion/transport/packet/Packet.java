@@ -1,6 +1,5 @@
 package com.liou.diversion.transport.packet;
 
-import com.liou.diversion.transport.Charset;
 import com.liou.diversion.utils.ByteUtils;
 
 /**
@@ -22,13 +21,12 @@ public class Packet {
 
     private byte[] lenBytes;// 长度字节
 
-    public static final int MAX_PAYLOAD_LENGTH = Integer.MAX_VALUE;
+    public static final long MAX_PAYLOAD_LENGTH = 0x7fffffffffffffL - 1;
+
+    public static final int BEARTBEAT_SIGN = 0x400;
 
     public Packet(byte[] bs) {
         int pl = (payload = bs) == null ? 0 : payload.length;
-        if (MAX_PAYLOAD_LENGTH < pl) {
-            throw new IllegalArgumentException("too much bytes");
-        }
         lenBytes = ByteUtils.toBytes(pl, false);
         head = (byte) lenBytes.length;
     }
@@ -36,9 +34,6 @@ public class Packet {
     public Packet(byte[] bs, int offset, int len) {
         if (bs == null || offset < 0 || len <= 0 || offset + len > bs.length) {
             throw new IllegalArgumentException();
-        }
-        if (MAX_PAYLOAD_LENGTH < len) {
-            throw new IllegalArgumentException("too much bytes");
         }
         payload = new byte[len];
         System.arraycopy(bs, offset, payload, 0, len);
@@ -68,7 +63,7 @@ public class Packet {
         return is(0x1000);
     }
 
-    public Packet setReq() {
+    public Packet request() {
         head |= 0x1000;
         return this;
     }
@@ -77,16 +72,16 @@ public class Packet {
         return is(0x800);
     }
 
-    public Packet setResp() {
+    public Packet response() {
         head |= 0x800;
         return this;
     }
 
     public boolean isBeartbeat() {
-        return is(0x400);
+        return is(BEARTBEAT_SIGN);
     }
 
-    public Packet setBeartbeat() {
+    public Packet beartbeat() {
         head |= 0x400;
         return this;
     }
@@ -95,24 +90,24 @@ public class Packet {
         return is(0x200);
     }
 
-    public Packet setHasUuid() {
+    public int uuid() {
+        return ByteUtils.toNum(payload, 0, 4);
+    }
+
+    public Packet withUuid() {
         head |= 0x200;
         return this;
     }
 
-    public int getUuid() {
-        return ByteUtils.toNum(payload, 0, 4);
-    }
-
     public boolean isText() {
-        return getCharsetCode() != 0;
+        return charsetCode() != 0;
     }
 
-    public int getCharsetCode() {
+    public int charsetCode() {
         return (head & 0xf8) >> 3;
     }
 
-    public Packet setCharsetCode(int charsetCode) {
+    public Packet charsetCode(int charsetCode) {
         head =(head & 0xff07) + ((charsetCode << 3) & 0xf8);
         return this;
     }
@@ -121,7 +116,7 @@ public class Packet {
      * 获取实际内容 不包含唯一标识
      * @return
      */
-    public byte[] getPayload() {
+    public byte[] payload() {
         boolean hasUuid = hasUuid();
         int offset = hasUuid ? 4 : 0;
         byte[] content = new byte[payload.length - offset];

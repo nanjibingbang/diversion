@@ -1,9 +1,9 @@
 package com.liou.diversion.transport;
 
-import java.util.concurrent.TimeoutException;
-
 import com.liou.diversion.element.Element;
-import com.liou.diversion.transport.packet.Packet;
+import com.liou.diversion.transport.request.RequestFuture;
+
+import java.util.concurrent.TimeoutException;
 
 /**
  * tcp i/o channel
@@ -27,7 +27,7 @@ public interface IoChannel {
      */
     Object request(Element element, long timeout);
 
-    void sendData(Packet data);
+    void sendRequest(RequestFuture request);
 
     void addAttribute(String key, Object obj);
 

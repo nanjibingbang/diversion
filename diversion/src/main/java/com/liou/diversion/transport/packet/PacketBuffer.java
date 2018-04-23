@@ -1,7 +1,6 @@
 package com.liou.diversion.transport.packet;
 
 import com.liou.diversion.utils.ByteUtils;
-
 import io.netty.buffer.ByteBuf;
 
 /**
@@ -112,11 +111,14 @@ public class PacketBuffer {
         }
     }
 
-    public Packet readPacket() {
-        if (!next()) {
-            return null;
+    public Packet readPacket(boolean skipBeartBeat) {
+        boolean next;
+        for(;(next = next()) && skipBeartBeat && (head & Packet.BEARTBEAT_SIGN) == Packet.BEARTBEAT_SIGN;) {
         }
-        return new Packet(head, payload);
+        if (next) {
+            return new Packet(head, payload);
+        }
+        return null;
     }
 
     // public void resize() {

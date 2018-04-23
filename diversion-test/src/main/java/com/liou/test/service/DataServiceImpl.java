@@ -15,8 +15,6 @@ import java.util.concurrent.locks.ReentrantLock;
 @Component
 public class DataServiceImpl implements DataService {
 
-    private Lock lock = new ReentrantLock();
-
     @Autowired
     private JedisPool jedisPool;
 
@@ -24,13 +22,11 @@ public class DataServiceImpl implements DataService {
     @Override
     public Result getData(Param type) {
         Jedis jedis = null;
-        lock.lock();
         try {
             jedis = jedisPool.getResource();
             String result = jedis.get(JSON.toJSONString(type));
             return result == null ? null : JSON.parseObject(result, Result.class);
         } finally {
-            lock.unlock();
             if (jedis != null) {
                 jedis.close();
             }

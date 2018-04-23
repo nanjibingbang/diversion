@@ -1,11 +1,10 @@
 package com.liou.diversion.transport.netty;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class ExceptionChannelHandler extends ChannelInboundHandlerAdapter {
 

@@ -1,11 +1,8 @@
 package com.liou.diversion.node;
 
 import com.liou.diversion.element.Element;
-import com.liou.diversion.transport.ChannelIoException;
 import com.liou.diversion.transport.ChannelManager;
 import com.liou.diversion.transport.IoChannel;
-import com.liou.diversion.transport.packet.Packet;
-import com.liou.diversion.utils.HessianUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

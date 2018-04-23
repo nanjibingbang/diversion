@@ -10,8 +10,6 @@ import io.netty.channel.ChannelPromise;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.netty.util.ReferenceCountUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Packet读写处理<br>
@@ -35,10 +33,8 @@ public class PacketChannelHandler extends ChannelDuplexHandler {
             }
             packetBuffer.append(byteBuf);
             Packet packet;
-            while (null != (packet = packetBuffer.readPacket())) {
-                if (!packet.isBeartbeat()) {
-                    ctx.fireChannelRead(packet);
-                }
+            while (null != (packet = packetBuffer.readPacket(true))) {
+                ctx.fireChannelRead(packet);
             }
         } finally {
             ReferenceCountUtil.release(byteBuf);

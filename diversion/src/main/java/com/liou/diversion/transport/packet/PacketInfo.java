@@ -19,11 +19,11 @@ public class PacketInfo {
     @Override
     public String toString() {
         if (packet.isBeartbeat()) {
-            return String.format("BEARTBEAT %s", new String(packet.getPayload(), Charset.fromCode(packet.getCharsetCode()).charset()));
+            return String.format("BEARTBEAT %s", new String(packet.payload(), Charset.fromCode(packet.charsetCode()).charset()));
         } else if (packet.isReq()) {
-            return String.format("REQUEST sign:%s content:%s", packet.getUuid(), HessianUtils.deserialize(packet));
+            return String.format("REQUEST sign:%s content:%s", packet.uuid(), HessianUtils.deserialize(packet));
         } else if (packet.isResp()) {
-            return String.format("RESPONSE sign:%s content:%s", packet.getUuid(), HessianUtils.deserialize(packet));
+            return String.format("RESPONSE sign:%s content:%s", packet.uuid(), HessianUtils.deserialize(packet));
         } else {
             return "UNKNOWN";
         }

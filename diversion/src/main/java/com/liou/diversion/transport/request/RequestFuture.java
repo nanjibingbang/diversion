@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RequestFuture {
 
     // 节点请求标识自增序列号
-    public static AtomicInteger generated;
+    private static AtomicInteger generated;
 
     static {
         generated = new AtomicInteger(1);
@@ -29,7 +29,7 @@ public class RequestFuture {
         this.element = element;
         this.requestSign = generated.getAndIncrement();
         requestContent = HessianUtils.serialize(element, requestSign);
-        requestContent.setReq();
+        requestContent.request();
     }
 
     public Element getElement() {

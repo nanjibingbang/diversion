@@ -21,7 +21,7 @@ public class ConfigUtils {
                 String config = annotation.value();
                 Object value = diversionConfig.getConfig(config);
                 if (value == null && !annotation.nullable()) {
-                    throw new ConfigApplyException(annotation.value() + "can't be null");
+                    throw new ConfigApplyException(annotation.value() + " can't be null");
                 }
                 field.setAccessible(true);
                 field.set(instance, value);

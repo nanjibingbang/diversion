@@ -1,7 +1,5 @@
 package com.liou.diversion.element;
 
-import org.apache.commons.lang.StringUtils;
-
 import java.lang.reflect.Method;
 
 /**

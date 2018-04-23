@@ -7,8 +7,8 @@ package com.liou.diversion.element.cache;
  */
 public class TransientResult {
 
-    private final Object result;
-    private final long limit;
+    private Object result;
+    private volatile long limit;
 
     public TransientResult(Object result, long timestamp) {
         this.limit = timestamp;
@@ -19,8 +19,15 @@ public class TransientResult {
         return result;
     }
 
-    public long getLimit() {
-        return limit;
+    public boolean isExpire() {
+        if (limit == 0L) {
+            return true;
+        }
+        if (System.currentTimeMillis() > limit) {
+            limit = 0L;
+            return true;
+        }
+        return false;
     }
 
 }

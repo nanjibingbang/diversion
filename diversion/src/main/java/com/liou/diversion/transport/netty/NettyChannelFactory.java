@@ -2,8 +2,6 @@ package com.liou.diversion.transport.netty;
 
 import com.liou.diversion.container.Config;
 import com.liou.diversion.element.execute.DiversionService;
-import com.liou.diversion.node.DiversionCluster;
-import com.liou.diversion.node.DiversionNode;
 import com.liou.diversion.transport.ChannelFactory;
 import com.liou.diversion.transport.Charset;
 import com.liou.diversion.transport.IoChannel;
@@ -136,7 +134,7 @@ public class NettyChannelFactory implements ChannelFactory {
     }
 
     @Override
-    public void acceptOn(int port, DiversionCluster diversionCluster) throws IOException, InterruptedException {
+    public void acceptOn(int port) throws IOException {
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(bossElg, ioElg).channel(NioServerSocketChannel.class)
                 .handler(new ChannelInboundHandlerAdapter() {
@@ -154,7 +152,14 @@ public class NettyChannelFactory implements ChannelFactory {
                                 TimeUnit.MILLISECONDS));
                     }
                 });
-        serverBootstrap.bind(new InetSocketAddress(port));
+        ChannelFuture future = serverBootstrap.bind(new InetSocketAddress(port));
+        try {
+            future.await();
+        } catch (InterruptedException e) {
+        }
+        if (!future.isSuccess()) {
+            throw new IOException(String.format("bind %d failed", port), future.cause());
+        }
     }
 
     @Override

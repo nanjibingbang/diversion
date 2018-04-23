@@ -38,7 +38,7 @@ public class DefaultTransientProvider implements TransientProvider {
         readLock.lock();
         try {
             transientResult = transientMap.get(element);
-            if (transientResult == null || System.currentTimeMillis() > transientResult.getLimit()) {
+            if (transientResult == null || transientResult.isExpire()) {
                 return null;
             }
             return transientResult;

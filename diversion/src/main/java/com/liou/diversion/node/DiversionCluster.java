@@ -57,11 +57,7 @@ public class DiversionCluster implements ChildrenChangeHandler, Destroyable {
         /**
          * 开放接入端口
          */
-        try {
-            channelFactory.acceptOn(listenPort, this);
-        } catch (Exception e) {
-            throw new SocketException(String.format("fail to listen on %d", listenPort));
-        }
+        channelFactory.acceptOn(listenPort);
         logger.info("开放接入端口{}", listenPort);
 
         // 添加所有节点
@@ -292,7 +288,7 @@ public class DiversionCluster implements ChildrenChangeHandler, Destroyable {
         try {
             List<DiversionNode> collect = nodeSet.stream()
                     .filter(node -> node.getKey().equals(child)).collect(Collectors.toList());
-            nodeSet.removeAll(collect);
+            collect.forEach(node -> removeNode(node, false));
         } finally {
             circleLock.unlock();
         }

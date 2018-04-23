@@ -1,15 +1,11 @@
 package com.liou.diversion.transport.netty;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.alibaba.fastjson.JSON;
 import com.liou.diversion.node.DiversionCluster;
 import com.liou.diversion.node.DiversionNode;
 import com.liou.diversion.transport.Charset;
 import com.liou.diversion.transport.IoChannel;
 import com.liou.diversion.transport.packet.Packet;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -18,6 +14,9 @@ import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 写超时事件处理（客户端）
@@ -58,7 +57,7 @@ public class WriteIdleChannelHandler extends ExceptionChannelHandler {
             DiversionCluster diversionCluster = channel.attr(AttributeKey.<DiversionCluster> valueOf("cluster")).get();
             content.put("node", diversionCluster.getLocalNodeString());
             Packet packet = new Packet(JSON.toJSONString(content).getBytes(charset.charset()));
-            packet.setReq().setBeartbeat().setCharsetCode(charset.code());
+            packet.request().beartbeat().charsetCode(charset.code());
             beartbeat = packet.packing();
             attr.set(beartbeat);
         }

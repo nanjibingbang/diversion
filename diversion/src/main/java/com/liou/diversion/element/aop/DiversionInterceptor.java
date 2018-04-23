@@ -32,6 +32,9 @@ public class DiversionInterceptor {
             Object[] args = proceedingJoinPoint.getArgs();
             Element element = new Element(diversion.targetClass(), diversion.targetMethod(), args);
             Object result = diversionService.receiveElement(element);
+            if (result instanceof Exception) {
+                throw (Exception)result;
+            }
             return signature.getReturnType().cast(result);
         }
         return proceed;

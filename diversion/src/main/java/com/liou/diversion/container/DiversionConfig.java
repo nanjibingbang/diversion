@@ -83,9 +83,6 @@ public class DiversionConfig {
         private Class<?> clazz;
 
         private Configs(String sign, Object defValue, Class<?> clazz) {
-            if (defValue == null) {
-                throw new NullPointerException("defValue");
-            }
             this.sign = sign;
             this.defValue = defValue;
             this.clazz = clazz;

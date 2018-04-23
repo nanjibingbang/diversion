@@ -1,10 +1,8 @@
 package com.liou.diversion.container.spring;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-
+import com.liou.diversion.container.DiversionConfig;
+import com.liou.diversion.container.DiversionConfig.Configs;
+import com.liou.diversion.transport.Charset;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
@@ -17,9 +15,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderSupport;
 import org.springframework.util.ResourceUtils;
 
-import com.liou.diversion.container.DiversionConfig;
-import com.liou.diversion.container.DiversionConfig.Configs;
-import com.liou.diversion.transport.Charset;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * 

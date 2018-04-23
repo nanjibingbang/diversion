@@ -28,7 +28,7 @@ public class HessianUtils {
             hessian2Output.close();
             byte[] bytes = baos.toByteArray();
             Packet packet = new Packet(bytes);
-            packet.setHasUuid();
+            packet.withUuid();
             return packet;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -37,7 +37,7 @@ public class HessianUtils {
 
     public static <T> T deserialize(Packet packet) {
         try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(packet.getPayload());
+            ByteArrayInputStream bais = new ByteArrayInputStream(packet.payload());
             Hessian2Input hessian2Input = new Hessian2Input(bais);
             hessian2Input.setSerializerFactory(serializerFactory);
             T result = (T) hessian2Input.readObject();

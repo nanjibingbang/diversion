@@ -9,7 +9,6 @@ import com.liou.diversion.node.DiversionNode;
 import com.liou.diversion.transport.ChannelIoException;
 import com.liou.diversion.transport.packet.Packet;
 import com.liou.diversion.utils.HessianUtils;
-import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,35 +37,40 @@ public class DiversionService {
     public Object receiveElement(Element element) throws Exception {
         long begin = System.currentTimeMillis();
         try {
-            // 优先从暂存获取
-            TransientResult transientResult = transientProvider.get(element);
-            if (transientResult != null) {
-                return transientResult.getResult();
-            }
-            DiversionNode selected = diversionCluster.select(element.hashCode());
-            logger.debug("select node {}", selected);
-            Object result = null;
-            if (diversionCluster.isLocalNode(selected)) {
-                result = localUpdate(element);
-            } else {
-                try {
-                    result = selected.receiveRemote(element, requestTimeout);
-                } catch (ChannelIoException e) {
-                    // 节点存在IO问题时在本地执行更新
-                    logger.warn("Unreachable Node:{}, Use Local", selected, e);
-                    result = localUpdate(element);
-                }
-            }
-            // 记录到本地暂存器
-            transientProvider.record(result, element);
-            return result;
+            return doReceiveElement(element);
         } finally {
-            long arg = System.currentTimeMillis() - begin;
-            if (arg > 50) {
-                logger.error("time spend:{}ms", arg);
+            long spend = System.currentTimeMillis() - begin;
+            if (spend > 50) {
+                logger.error("time spend:{}ms", spend);
             }
-            logger.debug("time spend:{}ms", arg);
+            logger.debug("time spend:{}ms", spend);
         }
+    }
+
+    private Object doReceiveElement(Element element) throws Exception {
+        // 优先从暂存获取
+        TransientResult transientResult = transientProvider.get(element);
+        if (transientResult != null) {
+            return transientResult.getResult();
+        }
+        DiversionNode selected = diversionCluster.select(element.hashCode());
+        logger.debug("select node {}", selected);
+        Object result = null;
+        if (diversionCluster.isLocalNode(selected)) {
+            result = localUpdate(element);
+        } else {
+            try {
+                result = selected.receiveRemote(element, requestTimeout);
+            } catch (ChannelIoException e) {
+                // 节点存在IO问题, 断开节点连接并重试
+                logger.warn("Unreachable Node:{}, Use Local", selected, e);
+                diversionCluster.nodeUnreachable(selected, true);
+                result = doReceiveElement(element);
+            }
+        }
+        // 记录到本地暂存器
+        transientProvider.record(result, element);
+        return result;
     }
 
     /**
@@ -88,18 +92,16 @@ public class DiversionService {
     /**
      * Element更新请求
      *
-     * @param channel 请求channel
-     * @param sign    请求标识
+     * @param executeContext 请求上下文
      * @param element 请求内容
      * @return
      */
-    public void executeUpdate(Channel channel, int sign, Element element) {
+    public void executeUpdate(ExecuteContext executeContext, Element element) {
         Object result = transientProvider.get(element);
         if (result != null) {
-            Packet packet = HessianUtils.serialize(result, sign).setResp();
-            channel.writeAndFlush(packet);
+            Packet packet = HessianUtils.serialize(result, executeContext.sign).response();
+            executeContext.channel.writeAndFlush(packet);
         } else {
-            ExecuteContext executeContext = new ExecuteContext(sign, channel);
             try {
                 elementTaskExecutor.execute(element, executeContext);
             } catch (Exception e) {

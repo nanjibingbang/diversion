@@ -1,7 +1,6 @@
 package com.liou.diversion.transport;
 
 import com.liou.diversion.container.Initialization;
-import com.liou.diversion.node.DiversionCluster;
 
 import java.io.IOException;
 import java.net.SocketAddress;
@@ -37,7 +36,7 @@ public interface ChannelFactory extends Initialization {
      * @param port
      * @throws Throwable
      */
-    void acceptOn(int port, DiversionCluster diversionCluster) throws IOException, InterruptedException;
+    void acceptOn(int port) throws IOException;
 
     void shutdown();
 

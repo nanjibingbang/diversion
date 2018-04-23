@@ -49,7 +49,7 @@ public class ElementTaskExecutor implements Destroyable {
     }
 
     /**
-     * 实现指定执行，从容器获取
+     * 获取创建新ElementUpdateTask
      *
      * @param element
      * @return

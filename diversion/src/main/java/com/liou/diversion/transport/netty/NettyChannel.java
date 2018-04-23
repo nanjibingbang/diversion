@@ -3,7 +3,6 @@ package com.liou.diversion.transport.netty;
 import com.liou.diversion.element.Element;
 import com.liou.diversion.transport.ChannelIoException;
 import com.liou.diversion.transport.IoChannel;
-import com.liou.diversion.transport.packet.Packet;
 import com.liou.diversion.transport.request.RequestFuture;
 import io.netty.channel.Channel;
 import io.netty.util.Attribute;
@@ -135,7 +134,7 @@ public class NettyChannel implements IoChannel {
         RequestFuture requestFuture = new RequestFuture(element);
         int sign = requestFuture.getRequestSign();
         waitMap.put(sign, requestFuture);
-        sendData(requestFuture.getRequestContent());
+        sendRequest(requestFuture);
         return requestFuture;
     }
 
@@ -150,11 +149,11 @@ public class NettyChannel implements IoChannel {
     }
 
     @Override
-    public void sendData(Packet data) {
+    public void sendRequest(RequestFuture request) {
         if (!isActive()) {
             throw new ChannelIoException();
         }
-        channel.writeAndFlush(data);
+        channel.writeAndFlush(request.getRequestContent());
     }
 
 }
