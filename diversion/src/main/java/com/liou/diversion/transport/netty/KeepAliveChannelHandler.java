@@ -29,7 +29,7 @@ public class KeepAliveChannelHandler extends ChannelInboundHandlerAdapter {
         /*
          * 不在节点集中的或主动关闭的不重连
          */
-        if (cluster != null && node != null && node.channel() != null) {
+        if (cluster != null && node != null && cluster.isRegistered(node)) {
             logger.info("inactive channel {}, reconnecting...", channel);
             try {
                 cluster.nodeReconnect(node);

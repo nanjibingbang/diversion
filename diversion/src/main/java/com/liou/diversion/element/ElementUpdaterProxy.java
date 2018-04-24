@@ -1,5 +1,6 @@
 package com.liou.diversion.element;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
@@ -26,7 +27,15 @@ public class ElementUpdaterProxy implements ElementUpdater {
 
     @Override
     public Object update(Element element) throws Exception {
-        return exeMed.invoke(proxyInstance, element.getParams());
+        try {
+            return exeMed.invoke(proxyInstance, element.getParams());
+        } catch (InvocationTargetException e) {
+            if (e.getCause() != null) {
+                throw (Exception) e.getCause();
+            } else {
+                throw e;
+            }
+        }
     }
 
     @Override
@@ -37,7 +46,7 @@ public class ElementUpdaterProxy implements ElementUpdater {
                 return false;
             }
             for (int i = 0; i < medTypes.length; i++) {
-                if(medTypes[i] != element.getParams()[i].getClass()) {
+                if (medTypes[i] != element.getParams()[i].getClass()) {
                     return false;
                 }
             }

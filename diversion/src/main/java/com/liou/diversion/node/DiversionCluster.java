@@ -160,6 +160,21 @@ public class DiversionCluster implements ChildrenChangeHandler, Destroyable {
     }
 
     /**
+     *
+     * 判断节点是否在注册节点集中
+     * @param diversionNode
+     * @return
+     */
+    public boolean isRegistered(DiversionNode diversionNode) {
+        circleLock.lock();
+        try {
+            return nodeSet.contains(diversionNode);
+        } finally {
+            circleLock.unlock();
+        }
+    }
+
+    /**
      * 通过一致性hash 获取执行节点<br>
      * 当选择的节点不可达时 将会从节点集移除<br>
      * 因为包含本地节点 所以总会选择到一个可用节点
