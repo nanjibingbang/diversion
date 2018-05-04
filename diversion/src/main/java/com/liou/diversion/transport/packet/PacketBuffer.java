@@ -113,18 +113,12 @@ public class PacketBuffer {
 
     public Packet readPacket(boolean skipBeartBeat) {
         boolean next;
-        for(;(next = next()) && skipBeartBeat && (head & Packet.BEARTBEAT_SIGN) == Packet.BEARTBEAT_SIGN;) {
-        }
+        for(;(next = next()) && skipBeartBeat && (head & Packet.BEARTBEAT_SIGN) == Packet.BEARTBEAT_SIGN;);
         if (next) {
             return new Packet(head, payload);
         }
         return null;
     }
-
-    // public void resize() {
-    // System.arraycopy(bytes, ps, bytes, 0, size);
-    // ps = 0;
-    // }
 
     public void clean() {
         bytes = new byte[capacity];

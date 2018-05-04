@@ -1,9 +1,11 @@
-package com.liou.diversion.element.execute;
+package com.liou.diversion.element;
 
 import com.liou.diversion.container.Config;
-import com.liou.diversion.element.Element;
 import com.liou.diversion.element.cache.TransientProvider;
 import com.liou.diversion.element.cache.TransientResult;
+import com.liou.diversion.element.execute.ElementTaskExecutor;
+import com.liou.diversion.element.execute.ElementUpdateTask;
+import com.liou.diversion.element.execute.ExecuteContext;
 import com.liou.diversion.node.DiversionCluster;
 import com.liou.diversion.node.DiversionNode;
 import com.liou.diversion.transport.ChannelIoException;

@@ -1,7 +1,7 @@
 package com.liou.diversion.transport.netty;
 
 import com.liou.diversion.container.Config;
-import com.liou.diversion.element.execute.DiversionService;
+import com.liou.diversion.element.DiversionService;
 import com.liou.diversion.transport.ChannelFactory;
 import com.liou.diversion.transport.Charset;
 import com.liou.diversion.transport.IoChannel;

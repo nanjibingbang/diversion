@@ -25,7 +25,7 @@ import java.util.Map;
  *
  */
 @Sharable
-public class WriteIdleChannelHandler extends ExceptionChannelHandler {
+public class WriteIdleChannelHandler extends AbstractExceptionChannelHandler {
 
     public static final AttributeKey<byte[]> CTX_BEARTBEAT = AttributeKey.newInstance("CTX_BEARTBEAT");
 

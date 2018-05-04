@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Sharable
-public class ReadIdleChannelHandler extends ExceptionChannelHandler {
+public class ReadIdleChannelHandler extends AbstractExceptionChannelHandler {
 
     private static Logger logger = LoggerFactory.getLogger(ReadIdleChannelHandler.class);
 

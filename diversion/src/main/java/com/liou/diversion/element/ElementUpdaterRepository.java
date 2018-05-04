@@ -1,12 +1,12 @@
 package com.liou.diversion.element;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 public class ElementUpdaterRepository {
 
-    private static Set<ElementUpdater> elementUpdaters = new HashSet<>();
+    private static List<ElementUpdater> elementUpdaters = new ArrayList<>();
 
     private ElementUpdaterRepository() {
     }
@@ -16,12 +16,10 @@ public class ElementUpdaterRepository {
     }
 
     public synchronized static ElementUpdater getUpdaterByElement(Element element) {
-        Iterator<ElementUpdater> it = elementUpdaters.iterator();
-        while (it.hasNext()) {
-            ElementUpdater elementUpdater = it.next();
-            if (elementUpdater.adapter(element)) {
-                return elementUpdater;
-            }
+        Optional<ElementUpdater> any = elementUpdaters.stream()
+                .filter(elementUpdater -> elementUpdater.adapter(element)).findAny();
+        if (any.isPresent()) {
+            return any.get();
         }
         return null;
     }

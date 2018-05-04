@@ -6,7 +6,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class ExceptionChannelHandler extends ChannelInboundHandlerAdapter {
+public abstract class AbstractExceptionChannelHandler extends ChannelInboundHandlerAdapter {
 
     private static Logger logger = LoggerFactory.getLogger(ReadIdleChannelHandler.class);
 
