@@ -14,17 +14,6 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class ExecuteStatePool implements ExecuteStateListener {
 
-    public enum State {
-        /**
-         * 新建
-         */
-        EXECUTE_STATE_NEW,
-        /**
-         * 完成
-         */
-        EXECUTE_STATE_DONE
-    }
-
     private final Map<ElementUpdateTask, AtomicReference<State>> stateMap;
 
     public ExecuteStatePool() {
@@ -33,6 +22,7 @@ public class ExecuteStatePool implements ExecuteStateListener {
 
     /**
      * 从状态池获取task并添加context
+     *
      * @param element
      * @param executeContext
      * @return
@@ -66,5 +56,16 @@ public class ExecuteStatePool implements ExecuteStateListener {
             }
             stateRef.set(state);
         }
+    }
+
+    public enum State {
+        /**
+         * 新建
+         */
+        EXECUTE_STATE_NEW,
+        /**
+         * 完成
+         */
+        EXECUTE_STATE_DONE
     }
 }

@@ -2,9 +2,8 @@ package com.liou.diversion.container;
 
 /**
  * 初始化
- * 
- * @author liou
  *
+ * @author liou
  */
 public interface Initialization {
 

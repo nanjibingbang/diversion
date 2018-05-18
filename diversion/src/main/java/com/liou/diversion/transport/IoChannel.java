@@ -7,9 +7,8 @@ import java.util.concurrent.TimeoutException;
 
 /**
  * tcp i/o channel
- * 
- * @author liou
  *
+ * @author liou
  */
 public interface IoChannel {
 
@@ -19,9 +18,8 @@ public interface IoChannel {
 
     /**
      * 执行同步请求 阻塞操作,io线程谨慎调用
-     * 
-     * @param element
-     *            请求内容
+     *
+     * @param element 请求内容
      * @return 请求结果
      * @throws TimeoutException
      */
@@ -32,7 +30,7 @@ public interface IoChannel {
     void addAttribute(String key, Object obj);
 
     void fireInited();
-    
+
     void close();
 
 }

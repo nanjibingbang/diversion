@@ -3,9 +3,9 @@ package com.liou.diversion.container.spring;
 import com.liou.diversion.EnableDiversion;
 import com.liou.diversion.container.Destroyable;
 import com.liou.diversion.container.Initialization;
+import com.liou.diversion.element.DiversionService;
 import com.liou.diversion.element.aop.DiversionInterceptor;
 import com.liou.diversion.element.cache.DefaultTransientProvider;
-import com.liou.diversion.element.DiversionService;
 import com.liou.diversion.element.execute.ElementTaskExecutor;
 import com.liou.diversion.monitor.Monitor;
 import com.liou.diversion.node.DiversionCluster;
@@ -27,16 +27,6 @@ import org.springframework.core.type.AnnotationMetadata;
  * @author liou
  */
 public class DiversionBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar {
-
-    class KeyValue {
-        public KeyValue(String key, Object value) {
-            this.key = key;
-            this.value = value;
-        }
-
-        String key;
-        Object value;
-    }
 
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
@@ -128,6 +118,15 @@ public class DiversionBeanDefinitionRegistrar implements ImportBeanDefinitionReg
         }
         registry.registerBeanDefinition(beanName, beanDefinition);
         return beanName;
+    }
+
+    class KeyValue {
+        String key;
+        Object value;
+        public KeyValue(String key, Object value) {
+            this.key = key;
+            this.value = value;
+        }
     }
 
 }

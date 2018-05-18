@@ -17,7 +17,6 @@ public class ByteUtils {
     }
 
     /**
-     * 
      * @param num
      * @param fix4Byte 是否固定4字节
      * @return

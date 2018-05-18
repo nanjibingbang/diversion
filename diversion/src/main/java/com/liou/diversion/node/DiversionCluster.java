@@ -28,10 +28,9 @@ import java.util.stream.Collectors;
  */
 public class DiversionCluster implements ChildrenChangeHandler, Destroyable {
     private static Logger logger = LoggerFactory.getLogger(DiversionCluster.class);
-
+    private final String localHost;
     @Config("listenport")
     private int listenPort;
-    private final String localHost;
     private DiversionNode localNode;
 
     @Config("replictions")
@@ -50,23 +49,6 @@ public class DiversionCluster implements ChildrenChangeHandler, Destroyable {
         this.nodeSet = new HashSet<>();
         this.circle = new TreeMap<>();
         this.circleLock = new ReentrantLock();
-    }
-
-    @Override
-    public void build(List<String> nodes) throws Exception {
-        /**
-         * 开放接入端口
-         */
-        channelFactory.acceptOn(listenPort);
-        logger.info("开放接入端口{}", listenPort);
-
-        // 添加所有节点
-        if (nodes != null && nodes.size() > 0) {
-            nodes.forEach(node -> addNode(new DiversionNode(node)));
-        }
-        // add local
-        localNode = new DiversionNode(String.format("%s->%s", localHost, listenPort));
-        addNode(localNode);
     }
 
     /**
@@ -89,6 +71,23 @@ public class DiversionCluster implements ChildrenChangeHandler, Destroyable {
             }
         }
         throw new SocketException("获取不到本地IP地址，确认拥有IPv4网卡, 所有网卡: " + interfaces);
+    }
+
+    @Override
+    public void build(List<String> nodes) throws Exception {
+        /**
+         * 开放接入端口
+         */
+        channelFactory.acceptOn(listenPort);
+        logger.info("开放接入端口{}", listenPort);
+
+        // 添加所有节点
+        if (nodes != null && nodes.size() > 0) {
+            nodes.forEach(node -> addNode(new DiversionNode(node)));
+        }
+        // add local
+        localNode = new DiversionNode(String.format("%s->%s", localHost, listenPort));
+        addNode(localNode);
     }
 
     public boolean isLocalNode(DiversionNode diversionNode) {
@@ -160,8 +159,8 @@ public class DiversionCluster implements ChildrenChangeHandler, Destroyable {
     }
 
     /**
-     *
      * 判断节点是否在注册节点集中
+     *
      * @param diversionNode
      * @return
      */
@@ -220,8 +219,9 @@ public class DiversionCluster implements ChildrenChangeHandler, Destroyable {
 
     /**
      * 不可达节点处理
+     *
      * @param diversionNode
-     * @param close 是否主动关闭
+     * @param close         是否主动关闭
      */
     public void nodeUnreachable(DiversionNode diversionNode, boolean close) {
         removeNode(diversionNode, close);

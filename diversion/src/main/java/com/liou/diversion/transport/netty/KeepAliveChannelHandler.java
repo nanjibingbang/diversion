@@ -12,9 +12,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * 客户端保活处理
- * 
- * @author liou
  *
+ * @author liou
  */
 @Sharable
 public class KeepAliveChannelHandler extends ChannelInboundHandlerAdapter {
@@ -24,8 +23,8 @@ public class KeepAliveChannelHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         Channel channel = ctx.channel();
-        DiversionCluster cluster = channel.attr(AttributeKey.<DiversionCluster> valueOf("cluster")).get();
-        DiversionNode node = channel.attr(AttributeKey.<DiversionNode> valueOf("node")).get();
+        DiversionCluster cluster = channel.attr(AttributeKey.<DiversionCluster>valueOf("cluster")).get();
+        DiversionNode node = channel.attr(AttributeKey.<DiversionNode>valueOf("node")).get();
         /*
          * 不在节点集中的或主动关闭的不重连
          */

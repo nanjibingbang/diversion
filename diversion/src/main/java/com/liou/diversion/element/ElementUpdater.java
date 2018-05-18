@@ -4,9 +4,8 @@ import com.liou.diversion.Adapter;
 
 /**
  * 节点添加该接口实现以更新
- * 
- * @author liou
  *
+ * @author liou
  */
 public interface ElementUpdater extends Adapter<Element> {
 

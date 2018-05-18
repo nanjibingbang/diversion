@@ -8,11 +8,63 @@ import java.util.Map;
 
 public class DiversionConfig {
 
+    public static final DiversionConfig INSTANCE = new DiversionConfig();
+    private Map<Configs, Object> configMap = new HashMap<>();
+
+    private DiversionConfig() {
+    }
+
+    /**
+     * 保存配置
+     *
+     * @param config
+     * @param value
+     */
+    public void addConfig(Configs config, String value) {
+        Object convert = convert(value, config.clazz);
+        configMap.put(config, convert);
+    }
+
+    public Object getConfig(Configs config) {
+        Object result = configMap.get(config);
+        if (result == null) {
+            String env = System.getProperty(config.sign);
+            addConfig(config, env);
+            result = configMap.get(config);
+        }
+        return result == null ? config.defValue() : result;
+    }
+
+    public Object getConfig(String configName) {
+        Configs config = Configs.formSign(configName);
+        if (config != null) {
+            return getConfig(config);
+        }
+        return null;
+    }
+
+    private Object convert(String property, Class<?> clazz) {
+        if (StringUtils.isBlank(property)) {
+            return null;
+        }
+        if (clazz == Integer.class) {
+            return Integer.valueOf(property);
+        } else if (clazz == Charset.class) {
+            Charset charset = Charset.fromName(property);
+            if (charset == null) {
+                charset = Charset.UTF8;
+            }
+            return charset;
+        } else {
+            return property;
+        }
+    }
+
     public enum Configs {
         /**
          * 当前节点名称
          */
-        NAME("diversion.localname", "", String.class),
+        NAME("diversion.localname", null, String.class),
         /**
          * 监听端口 默认33585
          */
@@ -60,7 +112,7 @@ public class DiversionConfig {
         /**
          * zk服务列表
          */
-        ZOOKEEPER_SERVERS("diversion.zookeeper.servers", "", String.class),
+        ZOOKEEPER_SERVERS("diversion.zookeeper.servers", null, String.class),
         /**
          * zk session超时
          */
@@ -82,10 +134,25 @@ public class DiversionConfig {
         private Object defValue;
         private Class<?> clazz;
 
-        private Configs(String sign, Object defValue, Class<?> clazz) {
+        Configs(String sign, Object defValue, Class<?> clazz) {
             this.sign = sign;
             this.defValue = defValue;
             this.clazz = clazz;
+        }
+
+        public static Configs formSign(String sign) {
+            if (StringUtils.isBlank(sign)) {
+                return null;
+            }
+            Configs[] values = Configs.values();
+            for (Configs config : values) {
+                if (config.sign.equals(sign)) {
+                    return config;
+                } else if (!sign.startsWith("diversion.") && config.sign.indexOf(sign) == 10) {
+                    return config;
+                }
+            }
+            return null;
         }
 
         /**
@@ -104,52 +171,6 @@ public class DiversionConfig {
         public Class<?> clazz() {
             return clazz;
         }
-
-        public static Configs formSign(String sign) {
-            if (StringUtils.isBlank(sign)) {
-                return null;
-            }
-            Configs[] values = Configs.values();
-            for (Configs config : values) {
-                if (config.sign.equals(sign)) {
-                    return config;
-                } else if (!sign.startsWith("diversion.") && config.sign.indexOf(sign) == 10) {
-                    return config;
-                }
-            }
-            return null;
-        }
-    }
-
-    public static final DiversionConfig INSTANCE = new DiversionConfig();
-
-    private Map<Configs, Object> configMap = new HashMap<>();
-
-    private DiversionConfig() {
-    }
-
-    /**
-     * 保存配置
-     *
-     * @param config
-     * @param value  必须是确定类型
-     */
-    public void addConfig(Configs config, Object value) {
-        configMap.put(config, value != null ? value : config.defValue());
-    }
-
-    public Object getConfig(Configs config) {
-        Object result = configMap.get(config);
-        return result == null ? config.defValue() : result;
-    }
-
-    public Object getConfig(String configName) {
-        Configs config = Configs.formSign(configName);
-        if (config != null) {
-            Object result = configMap.get(config);
-            return result == null ? config.defValue() : result;
-        }
-        return null;
     }
 
 }

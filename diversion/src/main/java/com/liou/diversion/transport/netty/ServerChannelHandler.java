@@ -1,7 +1,7 @@
 package com.liou.diversion.transport.netty;
 
-import com.liou.diversion.element.Element;
 import com.liou.diversion.element.DiversionService;
+import com.liou.diversion.element.Element;
 import com.liou.diversion.element.execute.ExecuteContext;
 import com.liou.diversion.transport.packet.Packet;
 import com.liou.diversion.utils.HessianUtils;
@@ -22,12 +22,12 @@ public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         try {
             Packet packet = (Packet) msg;
-            Object deserialized = HessianUtils.deserialize(packet);
+            Object deserialize = HessianUtils.deserialize(packet);
             if (packet.isResp()) {
                 NettyChannel nettyChannel = ctx.channel().attr(NettyChannel.ATTRKEY_IOCHANNEL).get();
-                nettyChannel.result(packet.uuid(), deserialized);
+                nettyChannel.result(packet.uuid(), deserialize);
             } else {
-                Element element = (Element) deserialized;
+                Element element = (Element) deserialize;
                 ExecuteContext executeContext = new ExecuteContext(packet.uuid(), ctx.channel());
                 diversionService.executeUpdate(executeContext, element);
             }

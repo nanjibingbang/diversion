@@ -19,6 +19,7 @@ public abstract class AbstractExceptionChannelHandler extends ChannelInboundHand
 
     /**
      * 异常关闭channel
+     *
      * @param channel
      */
     public abstract void exceptionClose(Channel channel);

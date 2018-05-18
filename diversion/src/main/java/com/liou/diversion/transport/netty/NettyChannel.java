@@ -18,27 +18,22 @@ import java.util.stream.Collectors;
 
 public class NettyChannel implements IoChannel {
 
+    public final static AttributeKey<NettyChannel> ATTRKEY_IOCHANNEL = AttributeKey.newInstance("ioChannelKey");
     private static Logger logger = LoggerFactory.getLogger(NettyChannel.class);
-
-    /**
-     * 对端地址
-     */
-    private final String host;
-
-    /**
-     * 对端端口
-     */
-    private final int port;
-
-    private Channel channel;
-
     /**
      * 请求应答对应map
      */
 //    private static ConcurrentSkipListMap<Integer, RequestFuture> waitMap = new ConcurrentSkipListMap<>();
     private static ConcurrentHashMap<Integer, RequestFuture> waitMap = new ConcurrentHashMap<>();
-
-    public final static AttributeKey<NettyChannel> ATTRKEY_IOCHANNEL = AttributeKey.newInstance("ioChannelKey");
+    /**
+     * 对端地址
+     */
+    private final String host;
+    /**
+     * 对端端口
+     */
+    private final int port;
+    private Channel channel;
 
     protected NettyChannel(String host, int port, Channel channel) {
         this.host = host;
@@ -59,13 +54,13 @@ public class NettyChannel implements IoChannel {
         return port;
     }
 
+    protected Channel getChannel() {
+        return channel;
+    }
+
     protected void setChannel(Channel channel) {
         channel.attr(ATTRKEY_IOCHANNEL).set(this);
         this.channel = channel;
-    }
-
-    protected Channel getChannel() {
-        return channel;
     }
 
     @Override
@@ -113,6 +108,7 @@ public class NettyChannel implements IoChannel {
 
     /**
      * 获取已有的请求
+     *
      * @param element
      * @return
      */

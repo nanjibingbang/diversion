@@ -144,14 +144,14 @@ public class NettyChannelFactory implements ChannelFactory {
                         logger.info("accepted channel {}", msg);
                     }
                 }).childHandler(new ChannelInitializer<Channel>() {
-                    @Override
-                    protected void initChannel(Channel ch) throws Exception {
-                        ChannelPipeline pipeline = ch.pipeline();
-                        pipeline.addFirst(readIdleChannelHandler, packetChannelHandler, serverChannelHandler);
-                        pipeline.addFirst(new IdleStateHandler(readerIdleTime, 0, 0,
-                                TimeUnit.MILLISECONDS));
-                    }
-                });
+            @Override
+            protected void initChannel(Channel ch) throws Exception {
+                ChannelPipeline pipeline = ch.pipeline();
+                pipeline.addFirst(readIdleChannelHandler, packetChannelHandler, serverChannelHandler);
+                pipeline.addFirst(new IdleStateHandler(readerIdleTime, 0, 0,
+                        TimeUnit.MILLISECONDS));
+            }
+        });
         ChannelFuture future = serverBootstrap.bind(new InetSocketAddress(port));
         try {
             future.await();

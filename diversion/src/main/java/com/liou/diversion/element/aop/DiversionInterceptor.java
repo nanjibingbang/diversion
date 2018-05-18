@@ -33,7 +33,7 @@ public class DiversionInterceptor {
             Element element = new Element(diversion.targetClass(), diversion.targetMethod(), args);
             Object result = diversionService.receiveElement(element);
             if (result instanceof Exception) {
-                throw (Exception)result;
+                throw (Exception) result;
             }
             return signature.getReturnType().cast(result);
         }

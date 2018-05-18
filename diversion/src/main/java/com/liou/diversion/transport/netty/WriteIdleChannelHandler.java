@@ -20,9 +20,8 @@ import java.util.Map;
 
 /**
  * 写超时事件处理（客户端）
- * 
- * @author liou
  *
+ * @author liou
  */
 @Sharable
 public class WriteIdleChannelHandler extends AbstractExceptionChannelHandler {
@@ -54,7 +53,7 @@ public class WriteIdleChannelHandler extends AbstractExceptionChannelHandler {
         byte[] beartbeat = attr.get();
         if (beartbeat == null) {
             Map<String, Object> content = new HashMap<>();
-            DiversionCluster diversionCluster = channel.attr(AttributeKey.<DiversionCluster> valueOf("cluster")).get();
+            DiversionCluster diversionCluster = channel.attr(AttributeKey.<DiversionCluster>valueOf("cluster")).get();
             content.put("node", diversionCluster.getLocalNodeString());
             Packet packet = new Packet(JSON.toJSONString(content).getBytes(charset.charset()));
             packet.request().beartbeat().charsetCode(charset.code());
@@ -68,8 +67,8 @@ public class WriteIdleChannelHandler extends AbstractExceptionChannelHandler {
 
     @Override
     public void exceptionClose(Channel channel) {
-        DiversionCluster cluster = channel.attr(AttributeKey.<DiversionCluster> valueOf("cluster")).get();
-        DiversionNode node = channel.attr(AttributeKey.<DiversionNode> valueOf("node")).get();
+        DiversionCluster cluster = channel.attr(AttributeKey.<DiversionCluster>valueOf("cluster")).get();
+        DiversionNode node = channel.attr(AttributeKey.<DiversionNode>valueOf("node")).get();
         if (cluster != null && node != null) {
             cluster.nodeUnreachable(node, true);
         }

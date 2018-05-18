@@ -4,6 +4,9 @@ import io.netty.channel.Channel;
 
 public class ExecuteContext {
 
+    public final int sign;
+    public final Channel channel;
+
     public ExecuteContext(int sign, Channel channel) {
         if (sign == 0 || channel == null) {
             throw new IllegalArgumentException(String.format("uuid:%s, channel:%s", sign, channel));
@@ -11,10 +14,6 @@ public class ExecuteContext {
         this.sign = sign;
         this.channel = channel;
     }
-
-    public final int sign;
-
-    public final Channel channel;
 
     @Override
     public boolean equals(Object obj) {

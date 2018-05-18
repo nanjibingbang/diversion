@@ -16,13 +16,12 @@ public class RequestFuture {
         generated = new AtomicInteger(1);
     }
 
-    // future是否完成
-    private volatile boolean done;
-
-    private Object response;
     private final Element element;
     private final Packet requestContent;
     private final int requestSign;
+    // future是否完成
+    private volatile boolean done;
+    private Object response;
 
     public RequestFuture(Element element) {
         done = false;
@@ -32,12 +31,17 @@ public class RequestFuture {
         requestContent.request();
     }
 
+    public static int currentRequestSign() {
+        return generated.get();
+    }
+
     public Element getElement() {
         return element;
     }
 
     /**
      * 请求
+     *
      * @return
      */
     public Packet getRequestContent() {
@@ -75,10 +79,6 @@ public class RequestFuture {
         this.response = response;
         done = true;
         notifyAll();
-    }
-
-    public static int currentRequestSign() {
-        return generated.get();
     }
 
 }

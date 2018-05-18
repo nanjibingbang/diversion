@@ -21,7 +21,7 @@ import java.util.List;
  * Content:
  * 2017-12-27 @author liou.
  */
-public class ZookeeperClient implements Initialization, Destroyable{
+public class ZookeeperClient implements Initialization, Destroyable {
 
     private static Logger logger = LoggerFactory.getLogger(ZookeeperClient.class);
 
@@ -123,22 +123,6 @@ public class ZookeeperClient implements Initialization, Destroyable{
             } catch (Exception e) {
             }
         }
-    }
-
-    public void setZkServers(String zkServers) {
-        this.zkServers = zkServers;
-    }
-
-    public void setZkSessionTimeout(Integer zkSessionTimeout) {
-        this.zkSessionTimeout = zkSessionTimeout;
-    }
-
-    public void setZkConnectionTimeout(Integer zkConnectionTimeout) {
-        this.zkConnectionTimeout = zkConnectionTimeout;
-    }
-
-    public void setZkMaxAttempts(Integer zkMaxAttempts) {
-        this.zkMaxAttempts = zkMaxAttempts;
     }
 
 }

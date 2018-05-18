@@ -13,9 +13,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * channel读超时事件处理（服务端）
- * 
- * @author liou
  *
+ * @author liou
  */
 @Sharable
 public class ReadIdleChannelHandler extends AbstractExceptionChannelHandler {
@@ -35,8 +34,8 @@ public class ReadIdleChannelHandler extends AbstractExceptionChannelHandler {
     }
 
     private void closeChannel(Channel channel) {
-        DiversionCluster cluster = channel.attr(AttributeKey.<DiversionCluster> valueOf("cluster")).get();
-        DiversionNode node = channel.attr(AttributeKey.<DiversionNode> valueOf("node")).get();
+        DiversionCluster cluster = channel.attr(AttributeKey.<DiversionCluster>valueOf("cluster")).get();
+        DiversionNode node = channel.attr(AttributeKey.<DiversionNode>valueOf("node")).get();
         if (cluster != null && node != null) {
             cluster.nodeUnreachable(node, false);
         }

@@ -65,7 +65,7 @@ public class DiversionService {
                 result = selected.receiveRemote(element, requestTimeout);
             } catch (ChannelIoException e) {
                 // 节点存在IO问题, 断开节点连接并重试
-                logger.warn("Unreachable Node:{}, Use Local", selected, e);
+                logger.warn("Unreachable Node:{}, retrying", selected, e);
                 diversionCluster.nodeUnreachable(selected, true);
                 result = doReceiveElement(element);
             }
@@ -95,7 +95,7 @@ public class DiversionService {
      * Element更新请求
      *
      * @param executeContext 请求上下文
-     * @param element 请求内容
+     * @param element        请求内容
      * @return
      */
     public void executeUpdate(ExecuteContext executeContext, Element element) {

@@ -15,7 +15,7 @@ public class Monitor {
         DiversionNode node = diversionCluster.getNode(sign);
         diversionCluster.nodeUnreachable(node, true);
     }
-    
+
     public void setDiversionCluster(DiversionCluster diversionCluster) {
         this.diversionCluster = diversionCluster;
     }

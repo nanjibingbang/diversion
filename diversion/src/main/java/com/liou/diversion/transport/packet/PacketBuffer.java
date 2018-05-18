@@ -4,15 +4,12 @@ import com.liou.diversion.utils.ByteUtils;
 import io.netty.buffer.ByteBuf;
 
 /**
- * 
- * 
  * 2.0 抛弃已读包数据 ensuresize避免不必要的内存重新分配<br>
  * 2.1 修改ensuresize对添加大比特数组与连续添加比特数组 新分配内存长度计算策略不同<br>
- * 
+ * <p>
  * 非线程安全<br>
- * 
- * @author liou
  *
+ * @author liou
  */
 public class PacketBuffer {
 
@@ -38,7 +35,7 @@ public class PacketBuffer {
 
     /**
      * flow to next packet
-     * 
+     *
      * @return <code>true</code> 如果buffer中含有至少一个packet,否则返回 <code>false</code>
      */
     private boolean next() {
@@ -62,7 +59,7 @@ public class PacketBuffer {
 
     /**
      * 适应ByteBuf
-     * 
+     *
      * @param byteBuf
      * @return
      */
@@ -113,7 +110,7 @@ public class PacketBuffer {
 
     public Packet readPacket(boolean skipBeartBeat) {
         boolean next;
-        for(;(next = next()) && skipBeartBeat && (head & Packet.BEARTBEAT_SIGN) == Packet.BEARTBEAT_SIGN;);
+        for (; (next = next()) && skipBeartBeat && (head & Packet.BEARTBEAT_SIGN) == Packet.BEARTBEAT_SIGN; ) ;
         if (next) {
             return new Packet(head, payload);
         }

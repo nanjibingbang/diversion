@@ -11,13 +11,14 @@ import java.lang.annotation.Target;
  * @author liou 2018-01-08.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.FIELD })
+@Target({ElementType.FIELD})
 public @interface Config {
 
     /**
      * 配置名称
-     * @see com.liou.diversion.container.DiversionConfig.Configs#sign()
+     *
      * @return
+     * @see com.liou.diversion.container.DiversionConfig.Configs#sign()
      */
     String value();
 

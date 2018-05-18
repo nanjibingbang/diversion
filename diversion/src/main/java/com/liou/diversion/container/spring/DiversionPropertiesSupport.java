@@ -2,7 +2,6 @@ package com.liou.diversion.container.spring;
 
 import com.liou.diversion.container.DiversionConfig;
 import com.liou.diversion.container.DiversionConfig.Configs;
-import com.liou.diversion.transport.Charset;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanInitializationException;
@@ -21,11 +20,9 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * 
  * spring容器中 diversion配置处理
- * 
- * @author liou
  *
+ * @author liou
  */
 public class DiversionPropertiesSupport extends PropertiesLoaderSupport
         implements BeanFactoryPostProcessor, FactoryBean<DiversionConfig> {
@@ -89,28 +86,12 @@ public class DiversionPropertiesSupport extends PropertiesLoaderSupport
     }
 
     private void recordConfig(Properties properties) {
-        Configs[] configs = Configs.values();
-        for(Configs config : configs) {
-            String sign = config.sign();
-            String property = properties.getProperty(sign);
-            if(StringUtils.isNotBlank(property)) {
-                diversionConfig.addConfig(config, convert(property, config.clazz()));
+        properties.entrySet().forEach(entry -> {
+            Configs config = Configs.formSign((String) entry.getKey());
+            if (config != null) {
+                diversionConfig.addConfig(config, (String) entry.getValue());
             }
-        }
-    }
-
-    private Object convert(String property, Class<?> clazz) {
-        if(clazz == Integer.class) {
-            return Integer.valueOf(property);
-        } else if(clazz == Charset.class) {
-            Charset charset = Charset.fromName(property);
-            if(charset == null) {
-                charset = Charset.UTF8;
-            }
-            return charset;
-        } else {
-            return property;
-        }
+        });
     }
 
     public void setConfigPath(String configPath) {

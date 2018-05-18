@@ -4,26 +4,21 @@ import com.liou.diversion.utils.ByteUtils;
 
 /**
  * 应用层传输协议封装<br>
- * 
+ * <p>
  * 首部2字节占用（3位版本标识，1位请求确认，1位响应完成，1位心跳包标识，1位是否有唯一标识，
  * 1位保留，5位编码标识同时标志为文本内容传输，3位负载长度字节标识）<br>
  * 负载长度（最长4字节）<br>
  * [唯一标识]负载 单包最大长度0x7fffffff
  *
  * @author liou
- *
  */
 public class Packet {
 
-    private int head = 0;
-
-    private final byte[] payload;// 负载
-
-    private byte[] lenBytes;// 长度字节
-
     public static final long MAX_PAYLOAD_LENGTH = 0x7fffffffffffffL - 1;
-
     public static final int BEARTBEAT_SIGN = 0x400;
+    private final byte[] payload;// 负载
+    private int head = 0;
+    private byte[] lenBytes;// 长度字节
 
     public Packet(byte[] bs) {
         int pl = (payload = bs) == null ? 0 : payload.length;
@@ -108,12 +103,13 @@ public class Packet {
     }
 
     public Packet charsetCode(int charsetCode) {
-        head =(head & 0xff07) + ((charsetCode << 3) & 0xf8);
+        head = (head & 0xff07) + ((charsetCode << 3) & 0xf8);
         return this;
     }
 
     /**
      * 获取实际内容 不包含唯一标识
+     *
      * @return
      */
     public byte[] payload() {

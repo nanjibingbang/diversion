@@ -1,7 +1,5 @@
 package com.liou.test.controller;
 
-import com.alibaba.fastjson.JSON;
-import com.liou.test.entity.Param;
 import com.liou.test.entity.Result;
 import com.liou.test.service.DataService;
 import org.slf4j.Logger;
@@ -18,14 +16,6 @@ import redis.clients.jedis.JedisPool;
 @RequestMapping("/test")
 public class TestController {
 
-    private static Logger logger = LoggerFactory.getLogger(TestController.class);
-
-    @Autowired
-    private DataService dataService;
-
-    @Autowired
-    private JedisPool jedisPool;
-
     /**
      * 该key只缓存guid
      */
@@ -34,7 +24,6 @@ public class TestController {
      * 缓存guid对应运营位详细信息
      */
     private final static String KEY_OPERATION_PO_GUID = "CMS:operationPosGuid_%s";
-
     private final static String SCRIPT_OPERATION_PO_USEFUL = "local usefulKey='%s';\n" +
             "local guids=redis.call('lrange', usefulKey, 0, -1);\n" +
             "local results={};\n" +
@@ -48,13 +37,18 @@ public class TestController {
             " end\n" +
             "end\n" +
             "return results;";
+    private static Logger logger = LoggerFactory.getLogger(TestController.class);
+    @Autowired
+    private DataService dataService;
+    @Autowired
+    private JedisPool jedisPool;
 
     @RequestMapping(value = "/result", method = RequestMethod.GET)
     public Result result(@RequestParam("title") String title) {
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
-            String script=String.format(SCRIPT_OPERATION_PO_USEFUL, String.format(KEY_OPERATION_POS_USEFUL, 's', 1, 'a'), "%s");
+            String script = String.format(SCRIPT_OPERATION_PO_USEFUL, String.format(KEY_OPERATION_POS_USEFUL, 's', 1, 'a'), "%s");
             System.out.println(script);
             Object result = jedis.eval(script);
             System.out.println(result);

@@ -2,9 +2,8 @@ package com.liou.diversion;
 
 /**
  * 适配器接口
- * 
- * @author liou
  *
+ * @author liou
  */
 public interface Adapter<T> {
 
