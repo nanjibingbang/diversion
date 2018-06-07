@@ -66,7 +66,7 @@ public class WriteIdleChannelHandler extends AbstractExceptionChannelHandler {
     }
 
     @Override
-    public void exceptionClose(Channel channel) {
+    public void handleException(Channel channel) {
         DiversionCluster cluster = channel.attr(AttributeKey.<DiversionCluster>valueOf("cluster")).get();
         DiversionNode node = channel.attr(AttributeKey.<DiversionNode>valueOf("node")).get();
         if (cluster != null && node != null) {

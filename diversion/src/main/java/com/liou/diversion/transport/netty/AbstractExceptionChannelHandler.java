@@ -14,7 +14,7 @@ public abstract class AbstractExceptionChannelHandler extends ChannelInboundHand
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         Channel channel = ctx.channel();
         logger.error("channel:{}关闭", channel);
-        exceptionClose(channel);
+        handleException(channel);
     }
 
     /**
@@ -22,6 +22,6 @@ public abstract class AbstractExceptionChannelHandler extends ChannelInboundHand
      *
      * @param channel
      */
-    public abstract void exceptionClose(Channel channel);
+    public abstract void handleException(Channel channel);
 
 }

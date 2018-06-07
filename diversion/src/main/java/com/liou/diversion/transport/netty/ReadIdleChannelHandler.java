@@ -42,7 +42,7 @@ public class ReadIdleChannelHandler extends AbstractExceptionChannelHandler {
     }
 
     @Override
-    public void exceptionClose(Channel channel) {
+    public void handleException(Channel channel) {
         closeChannel(channel);
     }
 
