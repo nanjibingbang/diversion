@@ -1,7 +1,7 @@
 package com.liou.test;
 
 
-import com.liou.diversion.EnableDiversion;
+import com.diversion.EnableDiversion;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

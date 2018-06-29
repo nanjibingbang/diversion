@@ -1,6 +1,6 @@
 package com.liou.test.controller;
 
-import com.liou.diversion.monitor.Monitor;
+import com.diversion.monitor.Monitor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
