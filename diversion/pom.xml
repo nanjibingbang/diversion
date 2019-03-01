@@ -7,7 +7,7 @@
 
     <properties>
         <netty-version>4.1.6.Final</netty-version>
-        <spring-version>4.3.9.RELEASE</spring-version>
+        <spring-version>5.1.4.RELEASE</spring-version>
         <aspectj-version>1.8.10</aspectj-version>
         <slf4j-version>1.7.21</slf4j-version>
         <log4j-version>1.2.17</log4j-version>
